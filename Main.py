@@ -43,7 +43,7 @@ import VisualLib as vis
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=False # Save figures to file? True/False
-LoadInitialState=False # Load The IntialSate? True/False
+LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
 SaveStates=False # Save States to File? True/False
 
@@ -54,7 +54,7 @@ IO=IOHDF5()
 EngineType='VW 2.0 R4 16v TDI CR 103kW'
 OilTemperature=95.0 #C
 EngineRPM=2400.0 #rpm
-EngineAcceleration=0.0;
+EngineAcceleration=0.0 #;
 
 
 """ Define Engine Geometry"""
@@ -66,7 +66,7 @@ Contact=TriboContact(Engine)
 
 
 """1D Computational Grid"""
-Nodes=256;
+Nodes=256 #;
 Grid=Grid(Contact,Nodes)
 
 """Temporal Discretization"""
@@ -95,17 +95,17 @@ Discretization=FiniteDifferences(Grid)
 
 
 """ Initialize Reynolds Solver"""
-MaxIterReynolds=5000;
-TolP=1e-4;
-UnderRelaxP=0.001;
-TolT=1e-4;
-UnderRelaxT=0.01;
+MaxIterReynolds=5000 #;
+TolP=1e-4 #;
+UnderRelaxP=0.001 #;
+TolT=1e-4 #;
+UnderRelaxT=0.01 #;
 Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
 MaxIterLoad=40
-Tolh0=1e-3;
+Tolh0=1e-3 #;
 UnderRelaxh0=0.2
 
 """Start from Initial guess or Load Initial State"""
