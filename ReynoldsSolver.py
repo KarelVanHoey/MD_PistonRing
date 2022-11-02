@@ -74,7 +74,10 @@ class ReynoldsSolver:
         
      
             #0. Calc Properties
-
+            Density = DensityFunc(StateVector[time])
+            SpecHeat = SpecHeatFunc(StateVector[time])
+            Viscosity = ViscosityFunc(StateVector[time])
+            Conduc = ConducFunc(StateVector[time])
         
             #1. LHS Pressure
                
