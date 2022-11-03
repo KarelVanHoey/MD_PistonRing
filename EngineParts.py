@@ -84,7 +84,7 @@ class CompressionRing:
                 self.FreeGapSize=0.012 #m
                 self.CrownHeight=10e-6  #Defines barrel shape
                 self.Roughness=0.1e-6 #m 
-                self.Curvature=((self.Thickness/2.0)**2.0)/(2*self.CrownHeight);
+                self.Curvature=((self.Thickness/2.0)**2.0)/(2*self.CrownHeight)
                 self.Material=Solids("Nitrided Stainless Steel")
             else:
                 self.Thickness=[]

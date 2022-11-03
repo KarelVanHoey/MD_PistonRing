@@ -21,17 +21,17 @@ class TriboContact:
         self.Domain=np.array([-Engine.CompressionRing.Thickness/2,Engine.CompressionRing.Thickness/2])
         
         """ Roughness parameters """
-        self.Roughness=np.sqrt(Engine.Cylinder.Roughness**2.0 + Engine.CompressionRing.Roughness**2.0);
-        self.Zeta=97.0e9;
-        self.Kappa=1.56e-6;
-        self.Tau0=2.0e6;
-        self.f_b=0.3;
+        self.Roughness=np.sqrt(Engine.Cylinder.Roughness**2.0 + Engine.CompressionRing.Roughness**2.0)
+        self.Zeta=97.0e9
+        self.Kappa=1.56e-6
+        self.Tau0=2.0e6
+        self.f_b=0.3
         self.RoughnessParameter=self.Zeta*self.Kappa*self.Roughness
         self.RoughnessSlope=self.Roughness/self.Kappa
         
         """Wear Coefficients"""
-        self.WearCoefficient_Cylinder=2.5e-10;
-        self.WearCoefficient_CompressionRing=1.25e-10;
+        self.WearCoefficient_Cylinder=2.5e-10
+        self.WearCoefficient_CompressionRing=1.25e-10
 
     def I2(self,l): 
         I2 = (0.5*(l**2+1)*special.erfc(l/np.sqrt(2.0)) - (l/np.sqrt(2.0*np.pi))*np.exp(-l**2.0/2.0))/np.sqrt(l)
@@ -47,7 +47,7 @@ class TriboContact:
 #################
     def AsperityContact(self,StateVector,time):
 
-        Lambda=StateVector[time].Lambda;
+        Lambda=StateVector[time].Lambda
        
         StateVector[time].AsperityArea=
         StateVector[time].AsperityLoad=
