@@ -150,8 +150,8 @@ else:
     StateVector[time].ViscousFriction=0.0
     
     Contact.AsperityContact(StateVector,time)
-    StateVector[time].COF=0.0;
-    StateVector[time].WearDepthRing=0.0;
+    StateVector[time].COF=0.0
+    StateVector[time].WearDepthRing=0.0
     StateVector[time].WearLocationsCylinder=np.unique(np.round(Ops.PistonPosition,8));       
     StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder; 
     
