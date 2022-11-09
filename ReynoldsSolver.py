@@ -87,8 +87,8 @@ class ReynoldsSolver:
         
             #2. RHS Pressure
             
-            b = self.Ops.SlidingVelocity/2 * DDX @ (Density * StateVector[time].h) + (Density * StateVector[time].h - Density_prev * StateVector[time-1]) / self.Time.dt 
-                #Note: Squeeze term: backward time differentiation for d(rho*h)/dt!
+            b = self.Ops.SlidingVelocity/2 * DDX @ (Density * StateVector[time].h) + (Density * StateVector[time].h - Density_prev * StateVector[time-1].h) / self.Time.dt 
+                #Note: backward time differentiation for d(rho*h)/dt!
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
             C = 10**20                               # Via FEM --> use penalty method to put in BC. In FEM it is recommended to use C between 10^20 and 10^30
@@ -97,51 +97,43 @@ class ReynoldsSolver:
             A[0,0] += C                             # x = -b/2
             b[0] += C * BC_1   
 
-            BC_2 = self.Ops.CylinderPressure        #[psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten? (Ik denk van niet, maar proberen als het niet werkt.)
+            BC_2 = self.Ops.CylinderPressure        # Moet hier gedefinieerd worden waar in de cycli we zitten?
             A[-1,-1] += C                           # x = +b/2
             b[-1] += C * BC_2
 
             #4. Solve System for Pressure + Update
-            p_star = linalg.spsolve(A,b)
-            Delta_p = max(p_star, 0) - StateVector[time].Pressure
-            
-            ## Update pressure
-            StateVector[time].Pressure += self.UnderRelaxP * Delta_p
+            StateVector[time].Pressure = linalg.spsolve(A,b)
 
-            # ## Update properties dependent on pressure --> moet dit? Staat niet in algoritme vermeld. Kunnen desnoods eens testen of dit sneller tot convergentie leidt.
-            # Density = DensityFunc(StateVector[time])
-            # SpecHeat = SpecHeatFunc(StateVector[time])
-            # Viscosity = ViscosityFunc(StateVector[time])
-            # Conduc = ConducFunc(StateVector[time])
+            Density = DensityFunc(StateVector[time])
+            SpecHeat = SpecHeatFunc(StateVector[time])
+            Viscosity = ViscosityFunc(StateVector[time])
+            Conduc = ConducFunc(StateVector[time])
             
             #5. LHS Temperature
 
-            # av_u = np.array([- StateVector[time].h**2 / (12 * Viscosity) * DDX(epsP) + self.Ops.SlidingVelocity / 2])
-            # u_plus = np.array([max(av_u[i], 0) for i in range(len(av_u))])
-            # u_min = np.array([min(av_u[i], 0) for i in range(len(av_u))])
+            # av_u = - StateVector[time].h**2 / (12 * Viscosity) * DDX @ StateVector[time].Pressure + self.Ops.SlidingVelocity / 2
+            # u_plus = np.where(av_u < 0, 0, av_u)
+            # u_min = np.where(av_u > 0, 0, av_u)
+            # D = u_plus * self.Time.dt @ DDXForward + u_min * self.Time.dt @ DDXBackward
+            # E = - Conduc / (Density * SpecHeat) * self.Time.dt @ D2DX2
+            # M = np.identity(Grid.Nx) + D + E
+
 
             #6. RHS Temperature
 
+            
             
             #7. Solve System for Temperature + Update
 
             
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
+ 
             
-            #################################################################################################################
-            ### Opmerking: moet dit nu hier of moet dit pas in stap 11? --> lijkt mij hier nutteloos om dit te berekenen. ###
-            #################################################################################################################
-
             #9. Residuals & Report
-            k += 1
-
-            epsP[k] = np.linalg.norm(np.divide(Delta_p, StateVector[time].Pressure)) / self.Grid.Nx
-
-
-        
-            
-
+         
+           
             #10. Provide a plot of the solution
+            # 9. Provide a plot of the solution
             if (k % 500 == 0):
                 CFL=np.max(Uaveraged)*self.Time.dt/self.Grid.dx
                 print("ReynoldsSolver:: CFL", np.round(CFL,2) ,"Residual [P,T] @Time:",round(self.Time.t[time]*1000,5),"ms & Iteration:",k,"-> [",np.round(epsP[k],6),",",np.round(epsT[k],6),"]")
