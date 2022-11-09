@@ -107,6 +107,7 @@ Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedb
 MaxIterLoad=40
 Tolh0=1e-3 #;
 UnderRelaxh0=0.2
+Delta_Load = 0.0
 
 """Start from Initial guess or Load Initial State"""
 
@@ -173,6 +174,9 @@ while time<Time.nt:
     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
 
     eps_h0 = np.ones(MaxIterLoad)
+    Delta_Load = np.zeros(MaxIterLoad)
+    h0_k = np.zeros(MaxIterLoad + 1)            # Not sure what to take as the initial values of h0: update of h0 requires 2 previous values and if the first ones are equal to 0.1 * sqrt(...) then the loop keeps going with the same values
+    h0_k[0] = StateVector[time-1]
     k_load = 1
     
     
@@ -181,19 +185,23 @@ while time<Time.nt:
     while (eps_h0[k_load] > Tolh0) and (k_load < MaxIterLoad): 
     
         """a. Calculate Film Thickness Profile"""
-        StateVector[time].h= 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + StateVector[time].h0
+        StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[time]
         
         """b. Calculate Asperity Load"""
-        StateVector[time].Lambda = 
+        StateVector[time].Lambda = min((h0_k[time] / Contact.Roughness), Contact.Lambda_c)
         Contact.AsperityContact(StateVector,time)
         
         """c. Solve Reynolds""" 
         Reynolds.SolveReynolds(StateVector,time)
         
         """d. Newton Raphson Iteration to find the h0"""
+
+        Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
+        h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
          
         """e. Update & Calculate Residual"""      
         
+        eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1)
        
         """Load Balance Output""" 
         print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")

@@ -118,7 +118,7 @@ class ReynoldsSolver:
             #7. Solve System for Temperature + Update
 
             
-            #8. Calculate other quantities
+            #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
  
             
             #9. Residuals & Report
