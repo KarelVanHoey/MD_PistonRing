@@ -75,21 +75,39 @@ class ReynoldsSolver:
      
             #0. Calc Properties
             Density = DensityFunc(StateVector[time])
+            Density_prev = DensityFunc(StateVector[time-1]) #Needed to calculate time differentiation in step 2.
             SpecHeat = SpecHeatFunc(StateVector[time])
             Viscosity = ViscosityFunc(StateVector[time])
             Conduc = ConducFunc(StateVector[time])
+
+            phi = Density*StateVector[time].h**3 / (12 * Viscosity)
         
             #1. LHS Pressure
-               
+            A = DDX @ (phi * DDX) #Need to solve for A*x = b
         
             #2. RHS Pressure
-    
-   
-            #3. Set Boundary Conditions Pressure
-           
             
-            #4. Solve System for Pressure + Update
+            b = self.Ops.SlidingVelocity/2 * DDX @ (Density * StateVector[time].h) + (Density * StateVector[time].h - Density_prev * StateVector[time-1]) / self.Time.dt 
+                #Note: backward time differentiation for d(rho*h)/dt!
+   
+            #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
+            C = 10**20                               # Via FEM --> use penalty method to put in BC. In FEM it is recommended to use C between 10^20 and 10^30
 
+            BC_1 = self.Ops.AtmosphericPressure
+            A[0,0] += C                             # x = -b/2
+            b[0] += C * BC_1   
+
+            BC_2 = self.Ops.CylinderPressure        # Moet hier gedefinieerd worden waar in de cycli we zitten?
+            A[-1,-1] += C                           # x = +b/2
+            b[-1] += C * BC_2
+
+            #4. Solve System for Pressure + Update
+            StateVector[time].Pressure = linalg.spsolve(A,b)
+
+            Density = DensityFunc(StateVector[time])
+            SpecHeat = SpecHeatFunc(StateVector[time])
+            Viscosity = ViscosityFunc(StateVector[time])
+            Conduc = ConducFunc(StateVector[time])
             
             #5. LHS Temperature
 
