@@ -121,10 +121,19 @@ class ReynoldsSolver:
 
             #6. RHS Temperature
 
-            
-            
+            # Q = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure)**2 + Viscosity * self.Ops.SlidingVelocity**2 / StateVector[time].h**2
+            # RHS = (StateVector[time].Temperature - StateVector[time-1].Temperature) + (self.Time.dt * Q) / (Density * SpecHeat)
+
+            #Boundary conditions
+
             #7. Solve System for Temperature + Update
 
+            # StateVector[time].Temperature = linalg.spsolve(M, RHS)
+
+            # Density = DensityFunc(StateVector[time])
+            # SpecHeat = SpecHeatFunc(StateVector[time])
+            # Viscosity = ViscosityFunc(StateVector[time])
+            # Conduc = ConducFunc(StateVector[time])
             
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
  
