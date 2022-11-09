@@ -17,21 +17,27 @@ class TriboContact:
         self.Engine=Engine
         
         """ Equivalent Young's modulus of Hertzian contact"""
-        self.YoungsModulus=1.0/((1.0-Engine.Cylinder.Material.PoissonModulus**2.0)/Engine.Cylinder.Material.YoungsModulus + (1.0-Engine.CompressionRing.Material.PoissonModulus**2)/Engine.CompressionRing.Material.YoungsModulus);
+        self.YoungsModulus=1.0/((1.0-Engine.Cylinder.Material.PoissonModulus**2.0)/Engine.Cylinder.Material.YoungsModulus + (1.0-Engine.CompressionRing.Material.PoissonModulus**2)/Engine.CompressionRing.Material.YoungsModulus)
         self.Domain=np.array([-Engine.CompressionRing.Thickness/2,Engine.CompressionRing.Thickness/2])
         
         """ Roughness parameters """
-        self.Roughness=np.sqrt(Engine.Cylinder.Roughness**2.0 + Engine.CompressionRing.Roughness**2.0);
-        self.Zeta=97.0e9;
-        self.Kappa=1.56e-6;
-        self.Tau0=2.0e6;
-        self.f_b=0.3;
+        self.Roughness=np.sqrt(Engine.Cylinder.Roughness**2.0 + Engine.CompressionRing.Roughness**2.0)
+        self.Zeta=97.0e9
+        self.Kappa=1.56e-6
+        self.Tau0=2.0e6
+        self.f_b=0.3
         self.RoughnessParameter=self.Zeta*self.Kappa*self.Roughness
         self.RoughnessSlope=self.Roughness/self.Kappa
+        self.Lambda_c = 2.2239
+
+        """Geometry of the cylinder and ring"""
+        self.L = 2 * np.pi * self.Engine.Cylinder.Radius
+        self.b = self.Engine.CompressionRing.Thickness
+        self.delta = self.Engine.CompressionRing.CrownHeight
         
         """Wear Coefficients"""
-        self.WearCoefficient_Cylinder=2.5e-10;
-        self.WearCoefficient_CompressionRing=1.25e-10;
+        self.WearCoefficient_Cylinder=2.5e-10
+        self.WearCoefficient_CompressionRing=1.25e-10
 
     def I2(self,l): 
         I2 = (0.5*(l**2+1)*special.erfc(l/np.sqrt(2.0)) - (l/np.sqrt(2.0*np.pi))*np.exp(-l**2.0/2.0))/np.sqrt(l)
@@ -40,6 +46,12 @@ class TriboContact:
     def I52(self,l):
         I52 = ((1.0/(8.0*np.sqrt(np.pi)))*np.exp(-l**2.0/4.0)*(l**(3.0/2.0))*((2.0*l**2.0+3.0)*special.kv(3.0/4.0,l**2.0/4.0)-(2.0*l**2.0+5.0)*special.kv(1.0/4.0,l**2.0/4.0)))/np.sqrt(l)
         return I52
+    
+    def I2_lambda(self, l):
+        return self.I2(l) * (l ** (-0.5))
+    
+    def I52_lambda(self, l):
+        return self.I52(l) * (l ** (-0.5))
 
 
 #################
@@ -47,12 +59,16 @@ class TriboContact:
 #################
     def AsperityContact(self,StateVector,time):
 
-        Lambda=StateVector[time].Lambda;
-       
-        StateVector[time].AsperityArea=
-        StateVector[time].AsperityLoad=
-        StateVector[time].AsperityFriction=
-        StateVector[time].AsperityContactPressure=
+        Lambda=StateVector[time].Lambda
+
+        AsperityArea = (np.pi**2) * ((self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2_lambda, Lambda, self.Lambda_c)[0]
+        AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * ((self.RoughnessParameter) ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52_lambda, Lambda, self.Lambda_c)[0]
+        AsperityFriction = self.Tau0 * AsperityArea / self.L + self.f_b * AsperityLoad
+
+        StateVector[time].AsperityArea= AsperityArea
+        StateVector[time].AsperityLoad= AsperityLoad
+        StateVector[time].AsperityFriction= AsperityFriction
+        StateVector[time].AsperityContactPressure= AsperityLoad / AsperityArea
         StateVector[time].HertzianContactPressure=
         
         

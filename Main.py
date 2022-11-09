@@ -150,8 +150,8 @@ else:
     StateVector[time].ViscousFriction=0.0
     
     Contact.AsperityContact(StateVector,time)
-    StateVector[time].COF=0.0;
-    StateVector[time].WearDepthRing=0.0;
+    StateVector[time].COF=0.0
+    StateVector[time].WearDepthRing=0.0
     StateVector[time].WearLocationsCylinder=np.unique(np.round(Ops.PistonPosition,8));       
     StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder; 
     
@@ -171,14 +171,17 @@ while time<Time.nt:
     time+=1
     StateVector[time]=copy.deepcopy(StateVector[time-1])
     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
+
+    eps_h0 = np.ones(MaxIterLoad)
+    k_load = 1
     
     
     """Start Load Balance Loop"""
     #TODO
-    while (): 
+    while (eps_h0[k_load] > Tolh0) and (k_load < MaxIterLoad): 
     
         """a. Calculate Film Thickness Profile"""
-        StateVector[time].h=
+        StateVector[time].h= 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + StateVector[time].h0
         
         """b. Calculate Asperity Load"""
         StateVector[time].Lambda = 
@@ -193,13 +196,15 @@ while time<Time.nt:
         
        
         """Load Balance Output""" 
-        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k,"-> [",np.round(epsh0[k],2+int(np.abs(np.log10(Tolh0)))),"]\n")
+        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
         if VisualFeedbackLevel>1:
            fig=vis.Report_PT(Grid,StateVector[time])                       
            if SaveFig2File:
-               figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k)+".png" 
+               figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
                fig.savefig(figname, dpi=300)  
-           plt.close(fig)         
+           plt.close(fig)
+
+        k_load += 1     
     
     
     """Visual Output per time step""" 
