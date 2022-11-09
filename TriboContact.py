@@ -34,6 +34,9 @@ class TriboContact:
         self.L = 2 * np.pi * self.Engine.Cylinder.Radius
         self.b = self.Engine.CompressionRing.Thickness
         self.delta = self.Engine.CompressionRing.CrownHeight
+        self.R_cylinder = Engine.Cylinder.Radius
+        self.R_piston = Engine.Piston.Radius
+    
         
         """Wear Coefficients"""
         self.WearCoefficient_Cylinder=2.5e-10
@@ -65,11 +68,13 @@ class TriboContact:
         AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * ((self.RoughnessParameter) ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52_lambda, Lambda, self.Lambda_c)[0]
         AsperityFriction = self.Tau0 * AsperityArea / self.L + self.f_b * AsperityLoad
 
+        R_eq = 1 / ((1 / self.R_cylinder) + (1 / self.R_piston))
+
         StateVector[time].AsperityArea= AsperityArea
         StateVector[time].AsperityLoad= AsperityLoad
         StateVector[time].AsperityFriction= AsperityFriction
         StateVector[time].AsperityContactPressure= AsperityLoad / AsperityArea
-        StateVector[time].HertzianContactPressure=
+        StateVector[time].HertzianContactPressure= (np.pi / 4) * np.sqrt((AsperityLoad * self.YoungsModulus) / (np.pi * R_eq))
         
         
 #################
