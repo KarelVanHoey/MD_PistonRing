@@ -28,6 +28,12 @@ class TriboContact:
         self.f_b=0.3
         self.RoughnessParameter=self.Zeta*self.Kappa*self.Roughness
         self.RoughnessSlope=self.Roughness/self.Kappa
+        self.Lambda_c = 2.2239
+
+        """Geometry of the cylinder and ring"""
+        self.L = 2 * np.pi * self.Engine.Cylinder.Radius
+        self.b = self.Engine.CompressionRing.Thickness
+        self.delta = self.Engine.CompressionRing.CrownHeight
         
         """Wear Coefficients"""
         self.WearCoefficient_Cylinder=2.5e-10
@@ -40,6 +46,12 @@ class TriboContact:
     def I52(self,l):
         I52 = ((1.0/(8.0*np.sqrt(np.pi)))*np.exp(-l**2.0/4.0)*(l**(3.0/2.0))*((2.0*l**2.0+3.0)*special.kv(3.0/4.0,l**2.0/4.0)-(2.0*l**2.0+5.0)*special.kv(1.0/4.0,l**2.0/4.0)))/np.sqrt(l)
         return I52
+    
+    def I2_lambda(self, l):
+        return self.I2(l) * (l ** (-0.5))
+    
+    def I52_lambda(self, l):
+        return self.I52(l) * (l ** (-0.5))
 
 
 #################
@@ -48,11 +60,15 @@ class TriboContact:
     def AsperityContact(self,StateVector,time):
 
         Lambda=StateVector[time].Lambda
-       
-        StateVector[time].AsperityArea=
-        StateVector[time].AsperityLoad=
-        StateVector[time].AsperityFriction=
-        StateVector[time].AsperityContactPressure=
+
+        AsperityArea = (np.pi**2) * ((self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2_lambda, Lambda, self.Lambda_c)[0]
+        AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * ((self.RoughnessParameter) ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52_lambda, Lambda, self.Lambda_c)[0]
+        AsperityFriction = self.Tau0 * AsperityArea / self.L + self.f_b * AsperityLoad
+
+        StateVector[time].AsperityArea= AsperityArea
+        StateVector[time].AsperityLoad= AsperityLoad
+        StateVector[time].AsperityFriction= AsperityFriction
+        StateVector[time].AsperityContactPressure= AsperityLoad / AsperityArea
         StateVector[time].HertzianContactPressure=
         
         
