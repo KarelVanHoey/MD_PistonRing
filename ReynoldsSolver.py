@@ -93,7 +93,10 @@ class ReynoldsSolver:
             
             #5. LHS Temperature
 
-            
+            # av_u = np.array([- StateVector[time].h**2 / (12 * Viscosity) * DDX(epsP) + self.Ops.SlidingVelocity / 2])
+            # u_plus = np.array([max(av_u[i], 0) for i in range(len(av_u))])
+            # u_min = np.array([min(av_u[i], 0) for i in range(len(av_u))])
+
             #6. RHS Temperature
 
             
