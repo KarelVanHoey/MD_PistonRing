@@ -75,32 +75,50 @@ class ReynoldsSolver:
      
             #0. Calc Properties
             Density = DensityFunc(StateVector[time])
-            Density_prev = PreviousDensity() #Needed to calculate time differentiation in step 2.
+            Density_prev = DensityFunc(StateVector[time-1]) #Needed to calculate time differentiation in step 2. --> or use PreviousDensity()?
             SpecHeat = SpecHeatFunc(StateVector[time])
             Viscosity = ViscosityFunc(StateVector[time])
             Conduc = ConducFunc(StateVector[time])
 
-            phi = Density*StateVector[time].h**3 / (12 * Viscosity)
+            phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity)
+            phi_sparse = sparse.csr_matrix(phi) #Nodig om sparse matrix te krijgen als resultaat van phi.multiply(sparse)
         
             #1. LHS Pressure
 
-            M = phi * D2DX2 + DDX @ phi @ DDX
+            M = phi_sparse.multiply(D2DX2) + DDX @ phi_sparse.multiply(DDX) #Checken of dit ok is!!
+            # print("HELP1")
+            # print("M",M.shape)
         
             #2. RHS Pressure
-            
-            b = self.Ops.SlidingVelocity/2 * DDX @ (Density * StateVector[time].h) + (Density * StateVector[time].h - Density_prev * StateVector[time-1].h) / self.Time.dt 
+            b = self.Ops.SlidingVelocity[time]/2 * DDX * np.multiply(Density, StateVector[time].h) + (np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt 
                 #Note: Squeeze term: backward time differentiation for d(rho*h)/dt!
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
-            SetDirichletRight(M)
-            SetDirichletLeft(M)
+
+            # M = SetDirichletLeft(M) # --> geeft om een of andere reden foutmelding ... "TypeError: memoryview: invalid slice key"
+            M.data[0] = 1
+            M.data[1] = 0
+            M.data[2] = 0
+            
+            # print(M.data[0])
+            # M = SetDirichletRight(M)
+            M.data[-1] = 1
+            M.data[-2] = 0
+            M.data[-3] = 0 
+            # print(M)
 
             b[0] = self.Ops.AtmosphericPressure     # [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
-            b[-1] = self.Ops.CylinderPressure
+            b[-1] = self.Ops.CylinderPressure[time]
+            # print("HELP2")
+            # print("b",b.shape)
+            # print("M",M.shape)
 
             #4. Solve System for Pressure + Update
             p_star = linalg.spsolve(M,b)
-            Delta_p = max(p_star, 0) - StateVector[time].Pressure
+            # Delta_p = max(p_star, 0) - StateVector[time].Pressure # --> moet dit voor elke x gechecked worden?
+            Delta_p = np.zeros(p_star.shape)
+            for i in range(len(Delta_p)):
+                Delta_p[i] = max(p_star[i], 0) - StateVector[time].Pressure[i]
 
             ## Update pressure
             StateVector[time].Pressure += self.UnderRelaxP * Delta_p
