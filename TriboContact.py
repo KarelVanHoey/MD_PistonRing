@@ -64,26 +64,26 @@ class TriboContact:
 
         Lambda=StateVector[time].Lambda
 
-        AsperityArea = (np.pi**2) * ((self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2_lambda, Lambda, self.Lambda_c)[0]
+        AsperityContactArea = (np.pi**2) * ((self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2_lambda, Lambda, self.Lambda_c)[0]
         AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * ((self.RoughnessParameter) ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52_lambda, Lambda, self.Lambda_c)[0]
-        AsperityFriction = self.Tau0 * AsperityArea / self.L + self.f_b * AsperityLoad
+        AsperityFriction = self.Tau0 * AsperityContactArea / self.L + self.f_b * AsperityLoad
 
         R_eq = 1 / ((1 / self.R_cylinder) + (1 / self.R_piston))
 
-        StateVector[time].AsperityArea= AsperityArea
+        StateVector[time].AsperityContactArea= AsperityContactArea
         StateVector[time].AsperityLoad= AsperityLoad
         StateVector[time].AsperityFriction= AsperityFriction
-        StateVector[time].AsperityContactPressure= AsperityLoad / AsperityArea
+        StateVector[time].AsperityContactPressure= AsperityLoad / AsperityContactArea
         StateVector[time].HertzianContactPressure= (np.pi / 4) * np.sqrt((AsperityLoad * self.YoungsModulus) / (np.pi * R_eq))
         
         
 #################
 ##### TO DO #####
 #################       
-    def Wear(self,Ops,Time,StateVector,time):
+    # def Wear(self,Ops,Time,StateVector,time):
         
-        # Calculate Wear Depth on the Piston Ring  
-        StateVector[time].WearDepthRing= # accumulated wear depth on the ring         
-        # Calculate The Wear Depth on the Cylinder wall
-        StateVector[time].WearLocationsCylinder= # array of unique Positions where the pistion passes by  
-        StateVector[time].WearDepthCylinder= #incremental wear depth on the positions in the array above
+    #     # Calculate Wear Depth on the Piston Ring  
+    #     StateVector[time].WearDepthRing= # accumulated wear depth on the ring         
+    #     # Calculate The Wear Depth on the Cylinder wall
+    #     StateVector[time].WearLocationsCylinder= # array of unique Positions where the pistion passes by  
+    #     StateVector[time].WearDepthCylinder= #incremental wear depth on the positions in the array above
