@@ -31,7 +31,7 @@ class Ops:
                                -Engine.Piston.ConRodLength * dthetadphi**2.0 * self.EngineSpeed**2.0 * np.cos(theta) \
                                -Engine.Piston.Cranck*(self.EngineSpeed**2.0 * np.cos(self.CranckAngle)+np.sin(self.CranckAngle)* EngineAcceleration)
         self.ChamberVolume=Engine.MinimumVolume + (np.pi*Engine.Cylinder.Radius**2.0)*(Engine.Piston.Cranck + Engine.Piston.ConRodLength - self.PistonPosition)
-        self.SlidingDistance=integration.cumtrapz(np.sqrt(1.0+(self.PistonVelocity)**2.0),Time.t)
+        self.SlidingDistance=integration.cumtrapz(np.sqrt(1.0+(self.PistonVelocity)**2.0),Time.t)       # Contains integral up to each timestep; element n is the integral until t=Time.t[n+1]
         self.SlidingVelocity=-self.PistonVelocity
 
         
