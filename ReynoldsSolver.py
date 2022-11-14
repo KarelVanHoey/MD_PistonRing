@@ -57,13 +57,13 @@ class ReynoldsSolver:
         PreviousDensity    =self.FluidModel.Density(StateVector[time-1])
         
         DDX=self.Discretization.DDXCentral
-        DDXBackward=self.Discretization.DDXBackward
-        DDXForward=self.Discretization.DDXForward
+        # DDXBackward=self.Discretization.DDXBackward
+        # DDXForward=self.Discretization.DDXForward
         D2DX2=self.Discretization.D2DX2
         SetDirichletLeft=self.Discretization.SetDirichletLeft
         SetDirichletRight=self.Discretization.SetDirichletRight
-        SetNeumannLeft=self.Discretization.SetNeumannLeft
-        SetNeumannRight=self.Discretization.SetNeumannRight
+        # SetNeumannLeft=self.Discretization.SetNeumannLeft
+        # SetNeumannRight=self.Discretization.SetNeumannRight
         
         #define your own when desired
         
@@ -75,7 +75,7 @@ class ReynoldsSolver:
      
             #0. Calc Properties
             Density = DensityFunc(StateVector[time])
-            Density_prev = DensityFunc(StateVector[time-1]) #Needed to calculate time differentiation in step 2.
+            Density_prev = PreviousDensity() #Needed to calculate time differentiation in step 2.
             SpecHeat = SpecHeatFunc(StateVector[time])
             Viscosity = ViscosityFunc(StateVector[time])
             Conduc = ConducFunc(StateVector[time])
@@ -83,7 +83,8 @@ class ReynoldsSolver:
             phi = Density*StateVector[time].h**3 / (12 * Viscosity)
         
             #1. LHS Pressure
-            A = DDX @ (phi * DDX) #Need to solve for A*x = b
+
+            M = phi * D2DX2 + DDX @ phi @ DDX
         
             #2. RHS Pressure
             
@@ -91,18 +92,14 @@ class ReynoldsSolver:
                 #Note: Squeeze term: backward time differentiation for d(rho*h)/dt!
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
-            C = 10**20                               # Via FEM --> use penalty method to put in BC. In FEM it is recommended to use C between 10^20 and 10^30
+            SetDirichletRight(M)
+            SetDirichletLeft(M)
 
-            BC_1 = self.Ops.AtmosphericPressure
-            A[0,0] += C                             # x = -b/2
-            b[0] += C * BC_1   
-
-            BC_2 = self.Ops.CylinderPressure        # [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
-            A[-1,-1] += C                           # x = +b/2
-            b[-1] += C * BC_2
+            b[0] = self.Ops.AtmosphericPressure     # [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
+            b[-1] = self.Ops.CylinderPressure
 
             #4. Solve System for Pressure + Update
-            p_star = linalg.spsolve(A,b)
+            p_star = linalg.spsolve(M,b)
             Delta_p = max(p_star, 0) - StateVector[time].Pressure
 
             ## Update pressure
@@ -116,7 +113,8 @@ class ReynoldsSolver:
             
             #5. LHS Temperature
 
-            # av_u = - StateVector[time].h**2 / (12 * Viscosity) * DDX @ StateVector[time].Pressure + self.Ops.SlidingVelocity / 2
+            av_u = - StateVector[time].h**2 / (12 * Viscosity) * DDX @ StateVector[time].Pressure + self.Ops.SlidingVelocity / 2
+            Uaveraged = av_u        # Om if (k % 500 == 0): ... te laten werken
             # u_plus = np.where(av_u < 0, 0, av_u)
             # u_min = np.where(av_u > 0, 0, av_u)
             # D = u_plus * self.Time.dt @ DDXForward + u_min * self.Time.dt @ DDXBackward
@@ -172,3 +170,7 @@ class ReynoldsSolver:
 
             
         #11. Calculate other quantities (e.g. Wall Shear Stress, Hydrodynamic Load, ViscousFriction)
+        StateVector[time].HydrodynamicLoad = np.trapz(StateVector[time].Pressure, dx=self.Grid.dx)
+        # WallShearStress = Viscosity *()         #Uit cursus gehaald, idk of dit correct is...
+
+
