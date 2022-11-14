@@ -104,7 +104,7 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad=40
+MaxIterLoad= 40
 Tolh0=1e-3 #;
 UnderRelaxh0=0.2
 Delta_Load = 0.0
@@ -176,14 +176,14 @@ while time<Time.nt:
     eps_h0 = np.ones(MaxIterLoad)
     Delta_Load = np.zeros(MaxIterLoad)
     h0_k = np.zeros(MaxIterLoad + 1)            # Not sure what to take as the initial values of h0: update of h0 requires 2 previous values and if the first ones are equal to 0.1 * sqrt(...) then the loop keeps going with the same values
-    h0_k[0] = StateVector[time-1]
-    k_load = 1
+    h0_k[0] = StateVector[time-1].h0
+    k_load = 0
     
-    
+    # print(time)
     """Start Load Balance Loop"""
     #TODO
-    while (eps_h0[k_load] > Tolh0) and (k_load < MaxIterLoad): 
-    
+    while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
+        # print("Help")
         """a. Calculate Film Thickness Profile"""
         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[time]
         
@@ -228,12 +228,11 @@ while time<Time.nt:
     
     """ Calculate Ohter Variables of Interest, e.g. COF wear"""
     #TODO
-    StateVector[time].Hersey=
-    StateVector[time].COF=
-    Contact.Wear(Ops,Time,StateVector,time)
+    # StateVector[time].Hersey=
+    # StateVector[time].COF=
+    # Contact.Wear(Ops,Time,StateVector,time)
  
     
-  
     """Save Output""" 
     if SaveStates:
         FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'

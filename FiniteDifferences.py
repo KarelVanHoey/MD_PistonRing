@@ -54,7 +54,10 @@ class FiniteDifferences:
     # Efficient Implementation for 1D csr type FD matrix
     #do not Change implementation below!
     def SetDirichletLeft(self,M):
-        M.data[[0,1,2]]=[1.0, 0.0, 0.0]
+        # M.data[[0,1,2]]=[1.0, 0.0, 0.0]
+        M.data[0] = 1
+        M.data[1] = 0
+        M.data[2] = 0
 
     def SetDirichletRight(self,M):
         M.data[[-3,-2,-1]]=[0.0, 0.0, 1.0]

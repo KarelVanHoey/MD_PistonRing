@@ -1,5 +1,7 @@
 ## Ruimte om te prutsen
 import numpy as np
 
-a = np.array([1,2,3])
-print(np.divide(a,a))
+a = np.ones((3,1))
+a[0] = 2
+a[1] = 3
+print(a)
