@@ -57,8 +57,8 @@ class ReynoldsSolver:
         PreviousDensity    =self.FluidModel.Density(StateVector[time-1])
         
         DDX=self.Discretization.DDXCentral
-        # DDXBackward=self.Discretization.DDXBackward
-        # DDXForward=self.Discretization.DDXForward
+        DDXBackward=self.Discretization.DDXBackward
+        DDXForward=self.Discretization.DDXForward
         D2DX2=self.Discretization.D2DX2
         SetDirichletLeft=self.Discretization.SetDirichletLeft
         SetDirichletRight=self.Discretization.SetDirichletRight
@@ -130,26 +130,50 @@ class ReynoldsSolver:
             # Conduc = ConducFunc(StateVector[time])
             
             #5. LHS Temperature
-
-            av_u = - StateVector[time].h**2 / (12 * Viscosity) * DDX @ StateVector[time].Pressure + self.Ops.SlidingVelocity / 2
+            print(sparse.csr_matrix(StateVector[time].Pressure))
+            print(DDX)
+            av_u = - np.multiply(np.divide(StateVector[time].h**2 , (12 * Viscosity)) , (DDX @ sparse.csr_matrix(StateVector[time].Pressure) ))+ self.Ops.SlidingVelocity / 2 #hier zit nog een fout: hoe dp/dx krijgen?
             Uaveraged = av_u        # Om if (k % 500 == 0): ... te laten werken
-            # u_plus = np.where(av_u < 0, 0, av_u)
-            # u_min = np.where(av_u > 0, 0, av_u)
-            # D = u_plus * self.Time.dt @ DDXForward + u_min * self.Time.dt @ DDXBackward
-            # E = - Conduc / (Density * SpecHeat) * self.Time.dt @ D2DX2
-            # M = np.identity(Grid.Nx) + D + E
+            print(av_u)
+            u_plus = np.where(av_u < 0, 0, av_u)
+            print(u_plus)
+            u_min = np.where(av_u > 0, 0, av_u)
+            print(u_min)
+            u_plus_sparse = sparse.csr_matrix(u_plus) * self.Time.dt
+            print('1', u_plus_sparse)
+            u_min_sparse = sparse.csr_matrix(u_min) * self.Time.dt
+            print('2', u_min_sparse)
+            D = u_plus_sparse.multiply(DDXForward)  + u_min_sparse.multiply(DDXBackward)
+            E1 = - Conduc / (Density * SpecHeat) * self.Time.dt
+            E = sparse.csr_matrix(E1) @ D2DX2
+            M1 = np.identity(self.Grid.Nx) + D + E
 
 
             #6. RHS Temperature
 
-            # Q = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure)**2 + Viscosity * self.Ops.SlidingVelocity**2 / StateVector[time].h**2
-            # RHS = (StateVector[time].Temperature - StateVector[time-1].Temperature) + (self.Time.dt * Q) / (Density * SpecHeat)
+            Q = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure)**2 + Viscosity * self.Ops.SlidingVelocity**2 / StateVector[time].h**2
+            RHS = (StateVector[time].Temperature - StateVector[time-1].Temperature) + (self.Time.dt * Q) / (Density * SpecHeat)
 
             #Boundary conditions
-
+            if self.Ops.SlidingVelocity <= 0:
+                M1[0,0:1] = [-1/self.Grid.Nx, 1/self.Grid.Nx]
+                M1[-1, -1] = 1
+                M1[0,3:-1] = 0
+                M1[-1,1:-2] = 0
+                RHS[0] = 0
+                RHS[-1] = self.Ops.OilTemperature
+            else:
+                M1[0,0] = 1
+                M1[2:-1, 0] = 0
+                M1[-1,-2:-1] = [-1/self.Grid.Nx, 1/self.Grid.Nx]
+                M1[-1,1:-3] = 0
+                RHS[0] = self.Ops.OilTemperature
+                RHS[-1] = 0
             #7. Solve System for Temperature + Update
 
-            # StateVector[time].Temperature = linalg.spsolve(M, RHS)
+            T_star = linalg.spsolve(M1, RHS)
+            delta_T = T_star - StateVector[time].Temperature
+            StateVector[time].Temperature += delta_T * self.UnderRelaxT
 
             # Density = DensityFunc(StateVector[time])
             # SpecHeat = SpecHeatFunc(StateVector[time])
