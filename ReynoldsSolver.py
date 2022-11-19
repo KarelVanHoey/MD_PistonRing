@@ -54,7 +54,7 @@ class ReynoldsSolver:
         ViscosityFunc  =self.FluidModel.DynamicViscosity
         SpecHeatFunc   =self.FluidModel.SpecificHeatCapacity
         ConducFunc     =self.FluidModel.ThermalConductivity      
-        PreviousDensity    =self.FluidModel.Density(StateVector[time-1])
+        # PreviousDensity    =self.FluidModel.Density(StateVector[time-1]) ## Not used
         
         DDX=self.Discretization.DDXCentral
         DDXBackward=self.Discretization.DDXBackward
@@ -82,16 +82,22 @@ class ReynoldsSolver:
 
             phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity)
             phi_sparse = sparse.csr_matrix(phi) #Nodig om sparse matrix te krijgen als resultaat van phi.multiply(sparse)
+            ### Karel: Ik vind deze methode niet zo overzichtelijk. Ik zou van phi_sparse een diagonaalmatrix maken zoals in de opgave
+            ### Karel: phi_sparse = sparse.diags(phi)
+            ### Karel: phi_column = sparse.csc_matrix(np.matrix(phi).T)
         
             #1. LHS Pressure
 
             M = phi_sparse.multiply(D2DX2) + DDX @ phi_sparse.multiply(DDX) #Checken of dit ok is!!
+            ### Karel: suggestie: sparse.diags(phi) @ D2DX2 + sparse.diags(DDX @ phi_column) @ DDX
             # print("HELP1")
             # print("M",M.shape)
         
             #2. RHS Pressure
             b = self.Ops.SlidingVelocity[time]/2 * DDX * np.multiply(Density, StateVector[time].h) + (np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt 
                 #Note: Squeeze term: backward time differentiation for d(rho*h)/dt!
+                ### Karel: Ik denk dat deze niet correct is.
+                ### Karel: suggestie: U/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h).T)) + "kolomvector van die hele zooi hierboven"
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
 
