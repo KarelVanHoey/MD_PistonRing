@@ -125,6 +125,8 @@ class ReynoldsSolver:
             Delta_p = np.zeros(p_star.shape)
             for i in range(len(Delta_p)):
                 Delta_p[i] = max(p_star[i], 0) - StateVector[time].Pressure[i]
+            ### Karel: Suggestie om if-loop te vermijden en snelheid te winnen:
+            ### Karel: Delta_p = np.maximum(p_star, np.zeros(len(Delta_p))) - StateVector[time].Pressure
 
             ## Update pressure
             StateVector[time].Pressure += self.UnderRelaxP * Delta_p
@@ -138,10 +140,12 @@ class ReynoldsSolver:
             #5. LHS Temperature
             print(sparse.csr_matrix(StateVector[time].Pressure))
             print(DDX)
-            av_u = - np.multiply(np.divide(StateVector[time].h**2 , (12 * Viscosity)) , (DDX @ sparse.csr_matrix(StateVector[time].Pressure) ))+ self.Ops.SlidingVelocity / 2 #hier zit nog een fout: hoe dp/dx krijgen?
+            av_u = - np.multiply(np.divide(StateVector[time].h**2 , (12 * Viscosity)), (DDX @ sparse.csr_matrix(StateVector[time].Pressure))) + self.Ops.SlidingVelocity / 2 #hier zit nog een fout: hoe dp/dx krijgen?
+            ### Karel: Ik denk dat hier best alles omgezet wordt in kolomvectoren, nu zijn het gewone arrays (1 rij). Dan gaat DDX correct werken.
             Uaveraged = av_u        # Om if (k % 500 == 0): ... te laten werken
             print(av_u)
             u_plus = np.where(av_u < 0, 0, av_u)
+            ### Hier kan ook np.maximum gebruikt worden zoals in lijn 128
             print(u_plus)
             u_min = np.where(av_u > 0, 0, av_u)
             print(u_min)
@@ -162,10 +166,10 @@ class ReynoldsSolver:
 
             #Boundary conditions
             if self.Ops.SlidingVelocity <= 0:
-                M1[0,0:1] = [-1/self.Grid.Nx, 1/self.Grid.Nx]
+                M1[0,0:1] = [-1/self.Grid.Nx, 1/self.Grid.Nx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
                 M1[-1, -1] = 1
-                M1[0,3:-1] = 0
-                M1[-1,1:-2] = 0
+                M1[0,3:-1] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
+                M1[-1,1:-2] = 0  ### Karel: hier moet het [-1, 1:-1] zijn denk ik
                 RHS[0] = 0
                 RHS[-1] = self.Ops.OilTemperature
             else:
