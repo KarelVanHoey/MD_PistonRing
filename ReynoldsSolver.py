@@ -123,34 +123,44 @@ class ReynoldsSolver:
             # Conduc = ConducFunc(StateVector[time])
             
             #5. LHS Temperature
-            print(sparse.csr_matrix(StateVector[time].Pressure))
-            print(DDX)
-            av_u = - np.multiply(np.divide(StateVector[time].h**2 , (12 * Viscosity)), (DDX @ sparse.csr_matrix(StateVector[time].Pressure))) + self.Ops.SlidingVelocity / 2 #hier zit nog een fout: hoe dp/dx krijgen?
-            ### Karel: Ik denk dat hier best alles omgezet wordt in kolomvectoren, nu zijn het gewone arrays (1 rij). Dan gaat DDX correct werken.
-            Uaveraged = av_u        # Om if (k % 500 == 0): ... te laten werken
-            print(av_u)
-            u_plus = np.where(av_u < 0, 0, av_u)
-            ### Hier kan ook np.maximum gebruikt worden zoals in lijn 128
-            print(u_plus)
-            u_min = np.where(av_u > 0, 0, av_u)
-            print(u_min)
-            u_plus_sparse = sparse.csr_matrix(u_plus) * self.Time.dt
-            print('1', u_plus_sparse)
-            u_min_sparse = sparse.csr_matrix(u_min) * self.Time.dt
-            print('2', u_min_sparse)
-            D = u_plus_sparse.multiply(DDXForward)  + u_min_sparse.multiply(DDXBackward)
+            # print(StateVector[time].Pressure)
+
+            pressure_column = sparse.csc_matrix(np.matrix(StateVector[time].Pressure).T)
+
+            h212mu = sparse.diags(np.divide(StateVector[time].h**2 , (12 * Viscosity)))
+            dpdx = DDX @ pressure_column
+            U2 = self.Ops.SlidingVelocity[time] / 2
+
+            av_u = - np.multiply(h212mu, dpdx) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*U2).T
+            Uaveraged = av_u      
+            
+            # print('av_u',av_u)
+            u_plus = np.maximum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
+            u_min = np.minimum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
+            u_plus_sparse = sparse.diags(u_plus) * self.Time.dt
+            u_min_sparse = sparse.diags(u_min) * self.Time.dt
+            D = u_plus_sparse @ DDXForward  + u_min_sparse @ DDXBackward
             E1 = - Conduc / (Density * SpecHeat) * self.Time.dt
-            E = sparse.csr_matrix(E1) @ D2DX2
-            M1 = np.identity(self.Grid.Nx) + D + E
+            E = sparse.diags(E1) @ D2DX2
+            M1 = np.identity(np.shape(av_u)[0]) + D + E
 
 
             #6. RHS Temperature
+            Q_term2 = Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
 
-            Q = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure)**2 + Viscosity * self.Ops.SlidingVelocity**2 / StateVector[time].h**2
-            RHS = (StateVector[time].Temperature - StateVector[time-1].Temperature) + (self.Time.dt * Q) / (Density * SpecHeat)
+            # print(sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T)
+            # print(sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T)
+
+            Q = np.multiply(h212mu, sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T
+            # print('q', Q)
+
+            RHS1 = sparse.csc_matrix(np.matrix(StateVector[time-1].Temperature).T)
+            RHS2 = self.Time.dt * sparse.diags((Density*SpecHeat)**-1) @ Q # Niels: ik moet nog eens checken als dit wel zeker correct is
+            print(RHS2)
+            RHS = RHS1 + RHS2
 
             #Boundary conditions
-            if self.Ops.SlidingVelocity <= 0:
+            if self.Ops.SlidingVelocity[time] <= 0:
                 M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
                 M1[-1, -1] = 1
                 M1[0,3:] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
@@ -160,7 +170,7 @@ class ReynoldsSolver:
             else:
                 M1[0,0] = 1     ## Nog eens checken!
                 M1[2:, 0] = 0
-                M1[-1,-2:] = [-1/self.Grid.Nx, 1/self.Grid.Nx]
+                M1[-1,-2:] = [-1/self.Grid.dx, 1/self.Grid.dx]
                 M1[-1,1:-2] = 0
                 RHS[0] = self.Ops.OilTemperature
                 RHS[-1] = 0
