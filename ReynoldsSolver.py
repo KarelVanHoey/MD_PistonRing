@@ -81,62 +81,36 @@ class ReynoldsSolver:
             Conduc = ConducFunc(StateVector[time])
 
             phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity)
-            ### OLD: phi_sparse = sparse.csr_matrix(phi) #Nodig om sparse matrix te krijgen als resultaat van phi.multiply(sparse)
-            ### Karel: Ik vind deze methode niet zo overzichtelijk. Ik zou van phi_sparse een diagonaalmatrix maken zoals in de opgave
-            ### Karel: phi_sparse = sparse.diags(phi)
-            ### Karel: phi_column = sparse.csc_matrix(np.matrix(phi).T)
-            ### Victor: akkoord, had dat gemist in de opgave.
+
             phi_diag = sparse.diags(phi)
             phi_column = sparse.csc_matrix(np.matrix(phi).T)
         
             #1. LHS Pressure
-
-            ### OLD: M = phi_sparse.multiply(D2DX2) + DDX @ phi_sparse.multiply(DDX) #Checken of dit ok is!!
-            ### Karel: suggestie: sparse.diags(phi) @ D2DX2 + sparse.diags(DDX @ phi_column) @ DDX
-            ### Victor: Akkoord --> geeft nu wel foutmelding: hij wilt DDX @ phi_column niet in sparse.diags, wss omdat hij dit als sparse column ziet + diags heeft een rij nodig...
-            
+ 
             #################################################################################################################################
             # Oere lelijk, maar enige dat gelijk werkt. sparse.diags aanvaard enkel niet-sparse rij array. Dus via .T gaat sparse kolom     #
             # naar sparse rij. .toarray() maakt er dan een normale array van, die om een of andere reden genest is: [[data1, data2,...]]    #
             # de [0] haalt er dan de juiste array uit...                                                                                    #
             #################################################################################################################################
             M = phi_diag @ D2DX2 + sparse.diags((DDX @ phi_column).T.toarray()[0]) @ DDX
+            # Victor: niet gwn via DDX @ phi_diag --> checken!!
             
         
             #2. RHS Pressure
-            ### OLD: b = self.Ops.SlidingVelocity[time]/2 * DDX * np.multiply(Density, StateVector[time].h) + (np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt 
-                #Note: Squeeze term: backward time differentiation for d(rho*h)/dt!
-                ### Karel: Ik denk dat deze niet correct is.
-                ### Karel: suggestie: U/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h).T)) + "kolomvector van die hele zooi hierboven"
-                ### Victor: Akkoord
+            
             b = self.Ops.SlidingVelocity[time]/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h)).T) + sparse.csc_matrix(np.matrix((np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt).T)
 
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
 
-            SetDirichletLeft(M) # OLD: --> geeft om een of andere reden foutmelding ... "TypeError: memoryview: invalid slice key"
-            # Victor: met aanpassing Karel kunnen we deze functies toch gebruiken!
-            # OLD: M.data[0] = 1
-            # OLD: M.data[1] = 0
-            # OLD: M.data[2] = 0
-    
+            SetDirichletLeft(M) 
             SetDirichletRight(M)
-            # OLD: M.data[-1] = 1
-            # OLD: M.data[-2] = 0
-            # OLD: M.data[-3] = 0 
-            # print(M)
 
             b[0] = self.Ops.AtmosphericPressure     
             b[-1] = self.Ops.CylinderPressure[time] # Victor: [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
             
             #4. Solve System for Pressure + Update
             p_star = linalg.spsolve(M,b)
-            ### OLD: Delta_p = np.zeros(p_star.shape)
-            ### for i in range(len(Delta_p)):
-            ###    Delta_p[i] = max(p_star[i], 0) - StateVector[time].Pressure[i]
-            ### Karel: Suggestie om if-loop te vermijden en snelheid te winnen:
-            ### Karel: Delta_p = np.maximum(p_star, np.zeros(len(Delta_p))) - StateVector[time].Pressure
-            ### Victor: Akkoord
             Delta_p = np.maximum(p_star, np.zeros(len(p_star))) - StateVector[time].Pressure
 
             ## Update pressure
@@ -177,17 +151,17 @@ class ReynoldsSolver:
 
             #Boundary conditions
             if self.Ops.SlidingVelocity <= 0:
-                M1[0,0:1] = [-1/self.Grid.Nx, 1/self.Grid.Nx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
+                M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
                 M1[-1, -1] = 1
-                M1[0,3:-1] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
-                M1[-1,1:-2] = 0  ### Karel: hier moet het [-1, 1:-1] zijn denk ik
+                M1[0,3:] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
+                M1[-1,1:-1] = 0  ### Karel: hier moet het [-1, 1:-1] zijn denk ik
                 RHS[0] = 0
                 RHS[-1] = self.Ops.OilTemperature
             else:
-                M1[0,0] = 1
-                M1[2:-1, 0] = 0
-                M1[-1,-2:-1] = [-1/self.Grid.Nx, 1/self.Grid.Nx]
-                M1[-1,1:-3] = 0
+                M1[0,0] = 1     ## Nog eens checken!
+                M1[2:, 0] = 0
+                M1[-1,-2:] = [-1/self.Grid.Nx, 1/self.Grid.Nx]
+                M1[-1,1:-2] = 0
                 RHS[0] = self.Ops.OilTemperature
                 RHS[-1] = 0
             #7. Solve System for Temperature + Update
@@ -211,8 +185,7 @@ class ReynoldsSolver:
             k += 1
 
             epsP[k] = np.linalg.norm(np.divide(Delta_p, StateVector[time].Pressure)) / self.Grid.Nx
-            ### Victor: @Niels: ook een residual voor de temp. maken. Voorstel:
-            # epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
+            epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
 
 
            
