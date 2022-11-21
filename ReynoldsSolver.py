@@ -81,57 +81,68 @@ class ReynoldsSolver:
             Conduc = ConducFunc(StateVector[time])
 
             phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity)
-            phi_sparse = sparse.csr_matrix(phi) #Nodig om sparse matrix te krijgen als resultaat van phi.multiply(sparse)
+            ### OLD: phi_sparse = sparse.csr_matrix(phi) #Nodig om sparse matrix te krijgen als resultaat van phi.multiply(sparse)
             ### Karel: Ik vind deze methode niet zo overzichtelijk. Ik zou van phi_sparse een diagonaalmatrix maken zoals in de opgave
             ### Karel: phi_sparse = sparse.diags(phi)
             ### Karel: phi_column = sparse.csc_matrix(np.matrix(phi).T)
+            ### Victor: akkoord, had dat gemist in de opgave.
+            phi_diag = sparse.diags(phi)
+            phi_column = sparse.csc_matrix(np.matrix(phi).T)
         
             #1. LHS Pressure
 
-            M = phi_sparse.multiply(D2DX2) + DDX @ phi_sparse.multiply(DDX) #Checken of dit ok is!!
+            ### OLD: M = phi_sparse.multiply(D2DX2) + DDX @ phi_sparse.multiply(DDX) #Checken of dit ok is!!
             ### Karel: suggestie: sparse.diags(phi) @ D2DX2 + sparse.diags(DDX @ phi_column) @ DDX
-            # print("HELP1")
-            # print("M",M.shape)
+            ### Victor: Akkoord --> geeft nu wel foutmelding: hij wilt DDX @ phi_column niet in sparse.diags, wss omdat hij dit als sparse column ziet + diags heeft een rij nodig...
+            
+            #################################################################################################################################
+            # Oere lelijk, maar enige dat gelijk werkt. sparse.diags aanvaard enkel niet-sparse rij array. Dus via .T gaat sparse kolom     #
+            # naar sparse rij. .toarray() maakt er dan een normale array van, die om een of andere reden genest is: [[data1, data2,...]]    #
+            # de [0] haalt er dan de juiste array uit...                                                                                    #
+            #################################################################################################################################
+            M = phi_diag @ D2DX2 + sparse.diags((DDX @ phi_column).T.toarray()[0]) @ DDX
+            
         
             #2. RHS Pressure
-            b = self.Ops.SlidingVelocity[time]/2 * DDX * np.multiply(Density, StateVector[time].h) + (np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt 
+            ### OLD: b = self.Ops.SlidingVelocity[time]/2 * DDX * np.multiply(Density, StateVector[time].h) + (np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt 
                 #Note: Squeeze term: backward time differentiation for d(rho*h)/dt!
                 ### Karel: Ik denk dat deze niet correct is.
                 ### Karel: suggestie: U/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h).T)) + "kolomvector van die hele zooi hierboven"
+                ### Victor: Akkoord
+            b = self.Ops.SlidingVelocity[time]/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h)).T) + sparse.csc_matrix(np.matrix((np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt).T)
+
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
 
-            # M = SetDirichletLeft(M) # --> geeft om een of andere reden foutmelding ... "TypeError: memoryview: invalid slice key"
-            M.data[0] = 1
-            M.data[1] = 0
-            M.data[2] = 0
-            
-            # print(M.data[0])
-            # M = SetDirichletRight(M)
-            M.data[-1] = 1
-            M.data[-2] = 0
-            M.data[-3] = 0 
+            SetDirichletLeft(M) # OLD: --> geeft om een of andere reden foutmelding ... "TypeError: memoryview: invalid slice key"
+            # Victor: met aanpassing Karel kunnen we deze functies toch gebruiken!
+            # OLD: M.data[0] = 1
+            # OLD: M.data[1] = 0
+            # OLD: M.data[2] = 0
+    
+            SetDirichletRight(M)
+            # OLD: M.data[-1] = 1
+            # OLD: M.data[-2] = 0
+            # OLD: M.data[-3] = 0 
             # print(M)
 
-            b[0] = self.Ops.AtmosphericPressure     # [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
-            b[-1] = self.Ops.CylinderPressure[time]
-            # print("HELP2")
-            # print("b",b.shape)
-            # print("M",M.shape)
-
+            b[0] = self.Ops.AtmosphericPressure     
+            b[-1] = self.Ops.CylinderPressure[time] # Victor: [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
+            
             #4. Solve System for Pressure + Update
             p_star = linalg.spsolve(M,b)
-            # Delta_p = max(p_star, 0) - StateVector[time].Pressure # --> moet dit voor elke x gechecked worden?
-            Delta_p = np.zeros(p_star.shape)
-            for i in range(len(Delta_p)):
-                Delta_p[i] = max(p_star[i], 0) - StateVector[time].Pressure[i]
+            ### OLD: Delta_p = np.zeros(p_star.shape)
+            ### for i in range(len(Delta_p)):
+            ###    Delta_p[i] = max(p_star[i], 0) - StateVector[time].Pressure[i]
             ### Karel: Suggestie om if-loop te vermijden en snelheid te winnen:
             ### Karel: Delta_p = np.maximum(p_star, np.zeros(len(Delta_p))) - StateVector[time].Pressure
+            ### Victor: Akkoord
+            Delta_p = np.maximum(p_star, np.zeros(len(p_star))) - StateVector[time].Pressure
 
             ## Update pressure
             StateVector[time].Pressure += self.UnderRelaxP * Delta_p
 
-            # ## Update properties dependent on pressure --> moet dit? Staat niet in algoritme vermeld. Kunnen desnoods eens testen of dit sneller tot convergentie leidt.
+            # ## Victor: Update properties dependent on pressure --> moet dit? Staat niet in algoritme vermeld. Kunnen desnoods eens testen of dit sneller tot convergentie leidt.
             # Density = DensityFunc(StateVector[time])
             # SpecHeat = SpecHeatFunc(StateVector[time])
             # Viscosity = ViscosityFunc(StateVector[time])
@@ -192,7 +203,7 @@ class ReynoldsSolver:
             
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
             #################################################################################################################
-            ### Opmerking: moet dit nu hier of moet dit pas in stap 11? --> lijkt mij hier nutteloos om dit te berekenen. ###
+            ### Opmerking: moet dit nu hier of moet dit pas in stap 11? --> lijkt mij nutteloos om dit hier te berekenen. ###
             #################################################################################################################
 
             
@@ -200,6 +211,8 @@ class ReynoldsSolver:
             k += 1
 
             epsP[k] = np.linalg.norm(np.divide(Delta_p, StateVector[time].Pressure)) / self.Grid.Nx
+            ### Victor: @Niels: ook een residual voor de temp. maken. Voorstel:
+            # epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
 
 
            
