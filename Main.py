@@ -153,8 +153,8 @@ else:
     Contact.AsperityContact(StateVector,time)
     StateVector[time].COF=0.0
     StateVector[time].WearDepthRing=0.0
-    StateVector[time].WearLocationsCylinder=np.unique(np.round(Ops.PistonPosition,8));       
-    StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder; 
+    StateVector[time].WearLocationsCylinder=np.unique(np.round(Ops.PistonPosition,8))
+    StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder
     
     if SaveStates:
         FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
@@ -185,10 +185,10 @@ while time<Time.nt:
     while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
         # print("Help")
         """a. Calculate Film Thickness Profile"""
-        StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[time]
+        StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
         """b. Calculate Asperity Load"""
-        StateVector[time].Lambda = min((h0_k[time] / Contact.Roughness), Contact.Lambda_c)
+        StateVector[time].Lambda = min((h0_k[k_load] / Contact.Roughness), Contact.Lambda_c)
         Contact.AsperityContact(StateVector,time)
         
         """c. Solve Reynolds""" 
