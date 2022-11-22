@@ -36,7 +36,6 @@ class TriboContact:
         self.delta = self.Engine.CompressionRing.CrownHeight
         self.R_cylinder = Engine.Cylinder.Radius
         self.R_piston = Engine.Piston.Radius
-    
         
         """Wear Coefficients"""
         self.WearCoefficient_Cylinder=2.5e-10
@@ -49,12 +48,6 @@ class TriboContact:
     def I52(self,l):
         I52 = ((1.0/(8.0*np.sqrt(np.pi)))*np.exp(-l**2.0/4.0)*(l**(3.0/2.0))*((2.0*l**2.0+3.0)*special.kv(3.0/4.0,l**2.0/4.0)-(2.0*l**2.0+5.0)*special.kv(1.0/4.0,l**2.0/4.0)))/np.sqrt(l)
         return I52
-    
-    def I2_lambda(self, l):
-        return self.I2(l) * (l ** (-0.5))
-    
-    def I52_lambda(self, l):
-        return self.I52(l) * (l ** (-0.5))
 
 
 #################
@@ -64,8 +57,8 @@ class TriboContact:
 
         Lambda=StateVector[time].Lambda
 
-        AsperityContactArea = (np.pi**2) * ((self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2_lambda, Lambda, self.Lambda_c,limit=100)[0]
-        AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * ((self.RoughnessParameter) ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52_lambda, Lambda, self.Lambda_c,limit=100)[0]
+        AsperityContactArea = ((np.pi * self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2, Lambda, self.Lambda_c,limit=100)[0]
+        AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * (self.RoughnessParameter ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52, Lambda, self.Lambda_c,limit=100)[0]
         AsperityFriction = self.Tau0 * AsperityContactArea / self.L + self.f_b * AsperityLoad
 
         R_eq = 1 / ((1 / self.R_cylinder) + (1 / self.R_piston))
@@ -82,14 +75,18 @@ class TriboContact:
 #################       
     def Wear(self,Ops,Time,StateVector,time):
         
+        p_tmin1 = StateVector[time-1].HertzianContactPressure
         p_t = StateVector[time].HertzianContactPressure
-        if time > 0:  
-            p_tmin1 = StateVector[time-1].HertzianContactPressure
-            s_tmin1 = Ops.SlidingDistance[time-2]
-            s_t = Ops.SlidingDistance[time-1]
+        s_t = Ops.SlidingDistance[time-1]
 
-            # Calculate Wear Depth on the Piston Ring
-            StateVector[time].WearDepthRing= StateVector[time-1].WearDepthRing + self.WearCoefficient_CompressionRing / self.Engine.CompressionRing.Material.Hardness * (p_tmin1 + p_t) * 0.5 * (s_t - s_tmin1) # accumulated wear depth on the ring         
+        if time > 1:  
+            s_tmin1 = Ops.SlidingDistance[time-2]
+
+        elif time == 1:
+            s_tmin1 = 0.0
+
+        # Calculate Wear Depth on the Piston Ring
+        StateVector[time].WearDepthRing= StateVector[time-1].WearDepthRing + self.WearCoefficient_CompressionRing / self.Engine.CompressionRing.Material.Hardness * (p_tmin1 + p_t) * 0.5 * (s_t - s_tmin1) # accumulated wear depth on the ring         
             
         # Calculate The Wear Depth on the Cylinder wall
 
