@@ -79,6 +79,8 @@ class ReynoldsSolver:
             SpecHeat = SpecHeatFunc(StateVector[time])
             Viscosity = ViscosityFunc(StateVector[time])
             Conduc = ConducFunc(StateVector[time])
+            # print("Viscosity")
+            # print(Viscosity)
 
             phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity)
 
@@ -93,7 +95,7 @@ class ReynoldsSolver:
             # de [0] haalt er dan de juiste array uit...                                                                                    #
             #################################################################################################################################
             M = phi_diag @ D2DX2 + sparse.diags((DDX @ phi_column).T.toarray()[0]) @ DDX
-            # Victor: niet gwn via DDX @ phi_diag --> checken!!
+            # Victor: niet gwn via DDX @ phi_diag --> checken!! --> NIET OK!!!
             
         
             #2. RHS Pressure
@@ -107,7 +109,7 @@ class ReynoldsSolver:
             SetDirichletRight(M)
 
             b[0] = self.Ops.AtmosphericPressure     
-            b[-1] = self.Ops.CylinderPressure[time] # Victor: [psi] --> Moet hier gedefinieerd worden waar in de cycli we zitten?
+            b[-1] = self.Ops.CylinderPressure[time] 
             
             #4. Solve System for Pressure + Update
             p_star = linalg.spsolve(M,b)
@@ -115,6 +117,8 @@ class ReynoldsSolver:
 
             ## Update pressure
             StateVector[time].Pressure += self.UnderRelaxP * Delta_p
+            # print("Pressure")
+            # print(StateVector[time].Pressure)
 
             # ## Victor: Update properties dependent on pressure --> moet dit? Staat niet in algoritme vermeld. Kunnen desnoods eens testen of dit sneller tot convergentie leidt.
             # Density = DensityFunc(StateVector[time])
@@ -123,7 +127,7 @@ class ReynoldsSolver:
             # Conduc = ConducFunc(StateVector[time])
             
             #5. LHS Temperature
-            # print(StateVector[time].Pressure)
+            # # print(StateVector[time].Pressure)
 
             pressure_column = sparse.csc_matrix(np.matrix(StateVector[time].Pressure).T)
 
@@ -134,51 +138,53 @@ class ReynoldsSolver:
             av_u = - np.multiply(h212mu, dpdx) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*U2).T
             Uaveraged = av_u      
             
-            # print('av_u',av_u)
-            u_plus = np.maximum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
-            u_min = np.minimum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
-            u_plus_sparse = sparse.diags(u_plus) * self.Time.dt
-            u_min_sparse = sparse.diags(u_min) * self.Time.dt
-            D = u_plus_sparse @ DDXForward  + u_min_sparse @ DDXBackward
-            E1 = - Conduc / (Density * SpecHeat) * self.Time.dt
-            E = sparse.diags(E1) @ D2DX2
-            M1 = np.identity(np.shape(av_u)[0]) + D + E
+            # # print('av_u',av_u)
+            # u_plus = np.maximum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
+            # u_min = np.minimum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
+            # u_plus_sparse = sparse.diags(u_plus) * self.Time.dt
+            # u_min_sparse = sparse.diags(u_min) * self.Time.dt
+            # D = u_plus_sparse @ DDXForward  + u_min_sparse @ DDXBackward
+            # E1 = - Conduc / (Density * SpecHeat) * self.Time.dt
+            # E = sparse.diags(E1) @ D2DX2
+            # M1 = np.identity(np.shape(av_u)[0]) + D + E
 
 
-            #6. RHS Temperature
-            Q_term2 = Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
+            # #6. RHS Temperature
+            # Q_term2 = Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
 
-            # print(sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T)
-            # print(sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T)
+            # # print(sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T)
+            # # print(sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T)
 
-            Q = np.multiply(h212mu, sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T
-            # print('q', Q)
+            # Q = np.multiply(h212mu, sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T
+            # # print('q', Q)
 
-            RHS1 = sparse.csc_matrix(np.matrix(StateVector[time-1].Temperature).T)
-            RHS2 = self.Time.dt * sparse.diags((Density*SpecHeat)**-1) @ Q # Niels: ik moet nog eens checken als dit wel zeker correct is
-            print(RHS2)
-            RHS = RHS1 + RHS2
+            # RHS1 = sparse.csc_matrix(np.matrix(StateVector[time-1].Temperature).T)
+            # RHS2 = self.Time.dt * sparse.diags((Density*SpecHeat)**-1) @ Q # Niels: ik moet nog eens checken als dit wel zeker correct is
+            # # print(RHS2)
+            # RHS = RHS1 + RHS2
 
-            #Boundary conditions
-            if self.Ops.SlidingVelocity[time] <= 0:
-                M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
-                M1[-1, -1] = 1
-                M1[0,3:] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
-                M1[-1,1:-1] = 0  ### Karel: hier moet het [-1, 1:-1] zijn denk ik
-                RHS[0] = 0
-                RHS[-1] = self.Ops.OilTemperature
-            else:
-                M1[0,0] = 1     ## Nog eens checken!
-                M1[2:, 0] = 0
-                M1[-1,-2:] = [-1/self.Grid.dx, 1/self.Grid.dx]
-                M1[-1,1:-2] = 0
-                RHS[0] = self.Ops.OilTemperature
-                RHS[-1] = 0
-            #7. Solve System for Temperature + Update
+            # #Boundary conditions
+            # if self.Ops.SlidingVelocity[time] <= 0:
+            #     M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
+            #     M1[-1, -1] = 1
+            #     M1[0,3:] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
+            #     M1[-1,1:-1] = 0  ### Karel: hier moet het [-1, 1:-1] zijn denk ik
+            #     RHS[0] = 0
+            #     RHS[-1] = self.Ops.OilTemperature
+            # else:
+            #     M1[0,0] = 1     ## Nog eens checken!
+            #     M1[2:, 0] = 0
+            #     M1[-1,-2:] = [-1/self.Grid.dx, 1/self.Grid.dx]
+            #     M1[-1,1:-2] = 0
+            #     RHS[0] = self.Ops.OilTemperature
+            #     RHS[-1] = 0
+            # #7. Solve System for Temperature + Update
 
-            T_star = linalg.spsolve(M1, RHS)
-            delta_T = T_star - StateVector[time].Temperature
-            StateVector[time].Temperature += delta_T * self.UnderRelaxT
+            # T_star = linalg.spsolve(M1, RHS)
+            # delta_T = T_star - StateVector[time].Temperature
+            # StateVector[time].Temperature += delta_T * self.UnderRelaxT
+            # print("Temp")
+            # print( StateVector[time].Temperature)
 
             # Density = DensityFunc(StateVector[time])
             # SpecHeat = SpecHeatFunc(StateVector[time])
@@ -195,7 +201,7 @@ class ReynoldsSolver:
             k += 1
 
             epsP[k] = np.linalg.norm(np.divide(Delta_p, StateVector[time].Pressure)) / self.Grid.Nx
-            epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
+            # epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
 
 
            
@@ -219,6 +225,8 @@ class ReynoldsSolver:
             
         #11. Calculate other quantities (e.g. Wall Shear Stress, Hydrodynamic Load, ViscousFriction)
         StateVector[time].HydrodynamicLoad = np.trapz(StateVector[time].Pressure, dx=self.Grid.dx)
+        # print("Help2")
+        # print( StateVector[time].HydrodynamicLoad)
         # WallShearStress = Viscosity *()         #Uit cursus gehaald, idk of dit correct is...
 
 

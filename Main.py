@@ -41,8 +41,8 @@ import VisualLib as vis
 
 
 """General Settings for Input and Output """
-VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=False # Save figures to file? True/False
+VisualFeedbackLevel=0 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
+SaveFig2File=True # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
 SaveStates=False # Save States to File? True/False
@@ -104,7 +104,7 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad= 40
+MaxIterLoad= 40 #originally 40
 Tolh0=1e-3 #;
 UnderRelaxh0=0.2
 Delta_Load = 0.0
@@ -173,17 +173,15 @@ while time<Time.nt:
     StateVector[time]=copy.deepcopy(StateVector[time-1])
     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
 
-    eps_h0 = np.ones(MaxIterLoad)
+    eps_h0 = np.ones(MaxIterLoad+1)
     Delta_Load = np.zeros(MaxIterLoad)
     h0_k = np.zeros(MaxIterLoad + 1)            # Not sure what to take as the initial values of h0: update of h0 requires 2 previous values and if the first ones are equal to 0.1 * sqrt(...) then the loop keeps going with the same values
     h0_k[0] = StateVector[time-1].h0
     k_load = 0
     
-    # print(time)
     """Start Load Balance Loop"""
     #TODO
     while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
-        # print("Help")
         """a. Calculate Film Thickness Profile"""
         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
@@ -198,10 +196,13 @@ while time<Time.nt:
 
         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
         h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
-         
+        # print("Help!")
+        # print("Load" + str( StateVector[time].HydrodynamicLoad))
+        # print("Delta " +str(Delta_Load[k_load] - Delta_Load[k_load - 1]))
         """e. Update & Calculate Residual"""      
-        
-        eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1)
+        k_load += 1 
+
+        eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
        
         """Load Balance Output""" 
         print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
@@ -212,7 +213,7 @@ while time<Time.nt:
                fig.savefig(figname, dpi=300)  
            plt.close(fig)
 
-        k_load += 1     
+            
     
     
     """Visual Output per time step""" 
