@@ -128,7 +128,7 @@ class ReynoldsSolver:
             # Viscosity = ViscosityFunc(StateVector[time])
             # Conduc = ConducFunc(StateVector[time])
             
-            #5. LHS Temperature
+            #5. LHS Temperature ---> Absolute temperaturen!
             # # print(StateVector[time].Pressure)
 
             pressure_column = sparse.csc_matrix(np.matrix(StateVector[time].Pressure).T)
