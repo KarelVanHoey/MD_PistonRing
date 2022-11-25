@@ -186,7 +186,7 @@ while time<Time.nt:
         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
         """b. Calculate Asperity Load"""
-        StateVector[time].Lambda = min((h0_k[k_load] / Contact.Roughness), Contact.Lambda_c)
+        StateVector[time].Lambda = min((h0_k[k_load] / Contact.Roughness), Contact.Lambda_c) # lambda hier gwn berekenen en min naar asperity contact verplaatsen
         Contact.AsperityContact(StateVector,time)
         
         """c. Solve Reynolds""" 
@@ -203,6 +203,7 @@ while time<Time.nt:
         k_load += 1 
 
         eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
+        #gok filmdikte: 1e van vorige tijdstap, 2e 99% van vorige tijdstap
        
         """Load Balance Output""" 
         print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
