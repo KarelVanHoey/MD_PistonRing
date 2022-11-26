@@ -48,7 +48,7 @@ class FiniteDifferences:
         # Second Derivative (D2DX2)
         self.D2DX2=sparse.diags(self.CentralStencilDD, [-1, 0, 1], shape=(Grid.Nx, Grid.Nx), dtype='float', format='csr')
         self.D2DX2[0,:3]=self.CentralStencilDD #Define right boundary stencil
-        self.D2DX2[0,-3:]=self.CentralStencilDD #Define left boundary stencil
+        self.D2DX2[-1,-3:]=self.CentralStencilDD #Define left boundary stencil
         
 
     # Efficient Implementation for 1D csr type FD matrix
