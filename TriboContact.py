@@ -55,7 +55,7 @@ class TriboContact:
 #################
     def AsperityContact(self,StateVector,time):
 
-        Lambda=StateVector[time].Lambda
+        Lambda = min(StateVector[time].Lambda, self.Lambda_c)
 
         AsperityContactArea = ((np.pi * self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2, Lambda, self.Lambda_c,limit=100)[0]
         AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * (self.RoughnessParameter ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52, Lambda, self.Lambda_c,limit=100)[0]
