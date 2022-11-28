@@ -59,6 +59,12 @@ class ReynoldsSolver:
 
         PHI = sparse.identity(self.Grid.Nx)
         DPHIDX = sparse.identity(self.Grid.Nx)
+
+        DPDX = sparse.identity(self.Grid.Nx)
+        UPLUSDT = sparse.identity(self.Grid.Nx)
+        UMINDT = sparse.identity(self.Grid.Nx)
+        E1 = sparse.identity(self.Grid.Nx)
+        I = sparse.identity(self.Grid.Nx)
         
         DDX=self.Discretization.DDXCentral
         DDXBackward=self.Discretization.DDXBackward
@@ -144,6 +150,22 @@ class ReynoldsSolver:
             # E = sparse.diags(E1) @ D2DX2
             # M1 = np.identity(np.shape(av_u)[0]) + D + E
 
+            ##### andere manier #####################################
+            # av_u = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
+            # Uaveraged = av_u
+
+            # u_plus = np.maximum(av_u, 0)
+            # u_min = np.minimum(av_u, 0)
+            
+            # UPLUSDT.data[:] = u_plus * self.Time.dt
+            # UMINDT.data[:] = u_min * self.Time.dt
+            # E1.data[:] = Conduc / (Density * SpecHeat
+
+            # D = UPLUSDT @ DDXForward + UMINDT @ DDXBackward
+            # E = - ( E1 * self.Time.dt ) @ D2DX2
+            # M1 = I + D + E
+
+            #########################################################
 
             # #6. RHS Temperature
             # Q_term2 = Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
@@ -158,6 +180,11 @@ class ReynoldsSolver:
             # RHS2 = self.Time.dt * sparse.diags((Density*SpecHeat)**-1) @ Q # Niels: ik moet nog eens checken als dit wel zeker correct is
             # # print(RHS2)
             # RHS = RHS1 + RHS2
+
+            ##### ANDERE MANIER #####################################
+            # Q = StateVector[time].h**2 / (12 * Viscosity) * np.square(DDX @ StateVector[time].Pressure) + Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
+            # RHS = StateVector[time-1].Temperature + Q * self.Time.dt / (Density * SpecHeat)
+            #########################################################
 
             # #Boundary conditions
             # if self.Ops.SlidingVelocity[time] <= 0:
