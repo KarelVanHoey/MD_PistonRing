@@ -44,7 +44,7 @@ import VisualLib as vis
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
-InitTime=0.0 #Initial Time to Load?
+InitTime=0.0 #Initial Time to Load, originally 0.0
 SaveStates=False # Save States to File? True/False
 
 """I/O Operator"""
@@ -95,17 +95,17 @@ Discretization=FiniteDifferences(Grid)
 
 
 """ Initialize Reynolds Solver"""
-MaxIterReynolds=5000 
-TolP=1e-4 
-UnderRelaxP=0.001 
-TolT=1e-4 
-UnderRelaxT=0.01 
+MaxIterReynolds=5000 #;
+TolP=1e-4 #;
+UnderRelaxP=0.001 #;
+TolT=1e-4 #;
+UnderRelaxT=0.01 #;
 Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
 MaxIterLoad= 40 #originally 40
-Tolh0=1e-3 
+Tolh0=1e-3 #;
 UnderRelaxh0=0.2
 Delta_Load = 0.0
 
@@ -162,10 +162,13 @@ else:
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 
+######################################################################################################
+## Test of Load Balance for a small time interval with squeeze term and WITHOUT temperature effects ##
+######################################################################################################
 
 """Start Time Loop"""
 start_time = TimeKeeper.time()
-while time<Time.nt:
+while time < InitTime*10**5 + 3: #Load balance for first time/100 ms
     
     
     """Initialize State"""
@@ -197,9 +200,7 @@ while time<Time.nt:
 
         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
         h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
-        # print("Help!")
-        # print("Load" + str( StateVector[time].HydrodynamicLoad))
-        # print("Delta " +str(Delta_Load[k_load] - Delta_Load[k_load - 1]))
+        
         """e. Update & Calculate Residual"""      
         k_load += 1 
 

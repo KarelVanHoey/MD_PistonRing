@@ -95,7 +95,7 @@ Discretization=FiniteDifferences(Grid)
 
 
 """ Initialize Reynolds Solver"""
-MaxIterReynolds=5000 
+MaxIterReynolds=6000 # originally 5000
 TolP=1e-4 
 UnderRelaxP=0.001 
 TolT=1e-4 
@@ -112,6 +112,7 @@ Delta_Load = 0.0
 """Start from Initial guess or Load Initial State"""
 
 time=(np.abs(Time.t - InitTime)).argmin()
+t0 = (np.abs(Time.t - InitTime)).argmin()
 
 if LoadInitialState:
     
@@ -162,24 +163,30 @@ else:
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 
+####################################################################################################################
+## Test of ReynoldsSolver for a constant film thickness at a given t, without squeeze term or temperature effects ##
+####################################################################################################################
+
 
 """Start Time Loop"""
 start_time = TimeKeeper.time()
-while time<Time.nt:
-    
+
+"""Take a time t (each [time] step is .01ms)"""
+for time in [120, 450, 2000, 3000, 4500]: # Calculation for t = time/100 ms: see plot of U and F vs time; Note: choose t in such a way that U>>0!
     
     """Initialize State"""
-    time+=1
-    StateVector[time]=copy.deepcopy(StateVector[time-1])
+    # time+=1
+    StateVector[time]=copy.deepcopy(StateVector[t0]) # Use initial state conditions
     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
 
     eps_h0 = np.ones(MaxIterLoad+1)
     Delta_Load = np.zeros(MaxIterLoad)
-    h0_k = np.zeros(MaxIterLoad + 1)
-    h0_k[0] = StateVector[time-1].h0
-    h0_k[1] = h0_k[0] * 1.01
+    h0_k = np.ones(MaxIterLoad + 1)
+    h0_k *= 5 * 10**(-6)
+    # h0_k[0] = StateVector[time-1].h0
+    # h0_k[1] = h0_k[0] * 1.01
     k_load = 1
-    
+
     """Start Load Balance Loop"""
     #TODO
     while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
@@ -196,27 +203,25 @@ while time<Time.nt:
         """d. Newton Raphson Iteration to find the h0"""
 
         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
-        h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
-        # print("Help!")
-        # print("Load" + str( StateVector[time].HydrodynamicLoad))
-        # print("Delta " +str(Delta_Load[k_load] - Delta_Load[k_load - 1]))
+        # h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
+        
         """e. Update & Calculate Residual"""      
         k_load += 1 
 
         eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
-       
+        
         """Load Balance Output""" 
         print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
         if VisualFeedbackLevel>1:
-           fig=vis.Report_PT(Grid,StateVector[time])                       
-           if SaveFig2File:
-               figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
-               fig.savefig(figname, dpi=300)  
-           plt.close(fig)
+            fig=vis.Report_PT(Grid,StateVector[time])                       
+            if SaveFig2File:
+                figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
+                fig.savefig(figname, dpi=300)  
+            plt.close(fig)
 
             
-    
-    
+
+
     """Visual Output per time step""" 
     if VisualFeedbackLevel>0:
         vis.Report_Ops(Time,Ops,time)
@@ -226,15 +231,15 @@ while time<Time.nt:
             fig.savefig(figname, dpi=300)
         plt.close(fig)
         
-    
-    
+
+
     """ Calculate Ohter Variables of Interest, e.g. COF wear"""
     #TODO
     # StateVector[time].Hersey=
     # StateVector[time].COF=
     # Contact.Wear(Ops,Time,StateVector,time)
- 
-    
+
+
     """Save Output""" 
     if SaveStates:
         FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'

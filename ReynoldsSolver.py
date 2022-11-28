@@ -87,28 +87,17 @@ class ReynoldsSolver:
             # phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity) # kan gwn normaal (numpy array)
             phi = Density * StateVector[time].h**3 / (12 * Viscosity)
 
-            # phi_diag = sparse.diags(phi) # nadeel: wordt elke keer opnieuw gedef. --> beter: sparse eenheids matrix voor loop definieren
-            # sparse diag voor while loop --> aanpassen via PHI.data = phi
-            # voor afgeleide zelfde: eenheidsmatrix via ... .data = DDX @ phi (je kan sparse met gwne rij vermenigvuldigen)
-            # phi_column = sparse.csc_matrix(np.matrix(phi).T)
-            PHI.data = phi
-            DPHIDX.data = DDX @ phi
+            PHI.data[:] = phi
+            DPHIDX.data[:] = DDX @ phi
         
             #1. LHS Pressure
- 
-            #################################################################################################################################
-            # Heel lelijk, maar enige dat gelijk werkt. sparse.diags aanvaard enkel niet-sparse rij array. Dus via .T gaat sparse kolom     #
-            # naar sparse rij. .toarray() maakt er dan een normale array van, die om een of andere reden genest is: [[data1, data2,...]]    #
-            # de [0] haalt er dan de juiste array uit...                                                                                    #
-            #################################################################################################################################
             M = PHI @ D2DX2 + DPHIDX @ DDX
-            # Victor: niet gwn via DDX @ phi_diag --> checken!! --> NIET OK!!!
             
         
             #2. RHS Pressure
             #kan gwn normaal + squeeze term eerst uitzetten bij uittesten 
-            b = self.Ops.SlidingVelocity[time]/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h)).T) + sparse.csc_matrix(np.matrix((np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt).T)
-
+            # b = self.Ops.SlidingVelocity[time]/2 * DDX @ sparse.csc_matrix(np.matrix(np.multiply(Density, StateVector[time].h)).T) # + sparse.csc_matrix(np.matrix((np.multiply(Density, StateVector[time].h) - np.multiply(Density_prev, StateVector[time-1].h)) / self.Time.dt).T) 
+            b = self.Ops.SlidingVelocity[time]/2 * (DDX @ (Density * StateVector[time].h))  + (Density * StateVector[time].h - Density_prev * StateVector[time-1].h) / self.Time.dt
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
 
@@ -120,7 +109,7 @@ class ReynoldsSolver:
             
             #4. Solve System for Pressure + Update
             p_star = linalg.spsolve(M,b)
-            Delta_p = np.maximum(p_star, np.zeros(len(p_star))) - StateVector[time].Pressure #np.zeros kan gwn nul zijn
+            Delta_p = np.maximum(p_star, 0) - StateVector[time].Pressure #np.zeros(self.Grid.Nx) kan gwn nul zijn
 
             ## Update pressure
             StateVector[time].Pressure += self.UnderRelaxP * Delta_p
