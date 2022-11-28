@@ -104,7 +104,7 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad= 40 #originally 40
+MaxIterLoad= 41 #originally 40
 Tolh0=1e-3 #;
 UnderRelaxh0=0.2
 Delta_Load = 0.0
@@ -175,9 +175,10 @@ while time<Time.nt:
 
     eps_h0 = np.ones(MaxIterLoad+1)
     Delta_Load = np.zeros(MaxIterLoad)
-    h0_k = np.zeros(MaxIterLoad + 1)            # Not sure what to take as the initial values of h0: update of h0 requires 2 previous values and if the first ones are equal to 0.1 * sqrt(...) then the loop keeps going with the same values
+    h0_k = np.zeros(MaxIterLoad + 2)
     h0_k[0] = StateVector[time-1].h0
-    k_load = 0
+    h0_k[1] = h0_k[0] * 1.01
+    k_load = 1
     
     """Start Load Balance Loop"""
     #TODO
@@ -186,7 +187,7 @@ while time<Time.nt:
         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
         """b. Calculate Asperity Load"""
-        StateVector[time].Lambda = min((h0_k[k_load] / Contact.Roughness), Contact.Lambda_c) # lambda hier gwn berekenen en min naar asperity contact verplaatsen
+        StateVector[time].Lambda = h0_k[k_load] / Contact.Roughness     # lambda hier gwn berekenen en min naar asperity contact verplaatsen
         Contact.AsperityContact(StateVector,time)
         
         """c. Solve Reynolds""" 
@@ -203,7 +204,6 @@ while time<Time.nt:
         k_load += 1 
 
         eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
-        #gok filmdikte: 1e van vorige tijdstap, 2e 99% van vorige tijdstap
        
         """Load Balance Output""" 
         print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
