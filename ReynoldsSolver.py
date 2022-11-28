@@ -55,6 +55,10 @@ class ReynoldsSolver:
         SpecHeatFunc   =self.FluidModel.SpecificHeatCapacity
         ConducFunc     =self.FluidModel.ThermalConductivity      
         # PreviousDensity    =self.FluidModel.Density(StateVector[time-1]) ## Not used
+        Density_prev = DensityFunc(StateVector[time-1])
+
+        PHI = sparse.identity(self.Grid.Nx)
+        DPHIDX = sparse.identity(self.Grid.Nx)
         
         DDX=self.Discretization.DDXCentral
         DDXBackward=self.Discretization.DDXBackward
@@ -75,19 +79,20 @@ class ReynoldsSolver:
      
             #0. Calc Properties
             Density = DensityFunc(StateVector[time])
-            Density_prev = DensityFunc(StateVector[time-1]) #MAg buiten loop! Needed to calculate time differentiation in step 2. --> or use PreviousDensity()?
             SpecHeat = SpecHeatFunc(StateVector[time])
             Viscosity = ViscosityFunc(StateVector[time])
             Conduc = ConducFunc(StateVector[time])
-            # print("Viscosity")
-            # print(Viscosity)
+            
 
-            phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity) # kan gwn normaal (numpy array)
+            # phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity) # kan gwn normaal (numpy array)
+            phi = Density * StateVector[time].h**3 / (12 * Viscosity)
 
-            phi_diag = sparse.diags(phi) # nadeel: wordt elke keer opnieuw gedef. --> beter: sparse eenheids matrix voor loop definieren
+            # phi_diag = sparse.diags(phi) # nadeel: wordt elke keer opnieuw gedef. --> beter: sparse eenheids matrix voor loop definieren
             # sparse diag voor while loop --> aanpassen via PHI.data = phi
             # voor afgeleide zelfde: eenheidsmatrix via ... .data = DDX @ phi (je kan sparse met gwne rij vermenigvuldigen)
-            phi_column = sparse.csc_matrix(np.matrix(phi).T)
+            # phi_column = sparse.csc_matrix(np.matrix(phi).T)
+            PHI.data = phi
+            DPHIDX.data = DDX @ phi
         
             #1. LHS Pressure
  
@@ -96,7 +101,7 @@ class ReynoldsSolver:
             # naar sparse rij. .toarray() maakt er dan een normale array van, die om een of andere reden genest is: [[data1, data2,...]]    #
             # de [0] haalt er dan de juiste array uit...                                                                                    #
             #################################################################################################################################
-            M = phi_diag @ D2DX2 + sparse.diags((DDX @ phi_column).T.toarray()[0]) @ DDX
+            M = PHI @ D2DX2 + DPHIDX @ DDX
             # Victor: niet gwn via DDX @ phi_diag --> checken!! --> NIET OK!!!
             
         

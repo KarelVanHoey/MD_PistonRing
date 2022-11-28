@@ -55,13 +55,13 @@ class TriboContact:
 #################
     def AsperityContact(self,StateVector,time):
 
-        Lambda=StateVector[time].Lambda
+        Lambda=StateVector[time].Lambda #hier minimum zetten
 
         AsperityContactArea = ((np.pi * self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2, Lambda, self.Lambda_c,limit=100)[0]
         AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * (self.RoughnessParameter ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52, Lambda, self.Lambda_c,limit=100)[0]
         AsperityFriction = self.Tau0 * AsperityContactArea / self.L + self.f_b * AsperityLoad
 
-        R_eq = 1 / ((1 / self.R_cylinder) + (1 / self.R_piston))
+        R_eq = 1 / ((1 / self.R_cylinder) + (1 / self.R_piston)) # al ergens gedefinieerd?
 
         StateVector[time].AsperityContactArea= AsperityContactArea
         StateVector[time].AsperityLoad= AsperityLoad
