@@ -104,7 +104,7 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad= 40 #originally 40
+MaxIterLoad= 41 #originally 40
 Tolh0=1e-3 
 UnderRelaxh0=0.2
 Delta_Load = 0.0
@@ -175,7 +175,7 @@ while time<Time.nt:
 
     eps_h0 = np.ones(MaxIterLoad+1)
     Delta_Load = np.zeros(MaxIterLoad)
-    h0_k = np.zeros(MaxIterLoad + 1)
+    h0_k = np.zeros(MaxIterLoad + 2)
     h0_k[0] = StateVector[time-1].h0
     h0_k[1] = h0_k[0] * 1.01
     k_load = 1
@@ -214,6 +214,7 @@ while time<Time.nt:
                fig.savefig(figname, dpi=300)  
            plt.close(fig)
 
+    StateVector[time].h0 = h0_k[k_load]
             
     
     
