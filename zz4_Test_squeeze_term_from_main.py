@@ -168,7 +168,7 @@ else:
 
 """Start Time Loop"""
 start_time = TimeKeeper.time()
-while time < InitTime*10**5 + 3: #Load balance for first time/100 ms
+while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms steps starting at InitTime
     
     
     """Initialize State"""
