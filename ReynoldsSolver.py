@@ -57,14 +57,14 @@ class ReynoldsSolver:
         # PreviousDensity    =self.FluidModel.Density(StateVector[time-1]) ## Not used
         Density_prev = DensityFunc(StateVector[time-1])
 
-        PHI = sparse.identity(self.Grid.Nx)
-        DPHIDX = sparse.identity(self.Grid.Nx)
+        PHI = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
+        DPHIDX = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
 
-        DPDX = sparse.identity(self.Grid.Nx)
-        UPLUSDT = sparse.identity(self.Grid.Nx)
-        UMINDT = sparse.identity(self.Grid.Nx)
-        E1 = sparse.identity(self.Grid.Nx)
-        I = sparse.identity(self.Grid.Nx)
+        DPDX = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
+        UPLUSDT = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
+        UMINDT = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
+        E1 = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
+        I = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
         
         DDX=self.Discretization.DDXCentral
         DDXBackward=self.Discretization.DDXBackward
@@ -93,8 +93,8 @@ class ReynoldsSolver:
             # phi = np.divide(np.multiply(Density, StateVector[time].h**3), 12 * Viscosity) # kan gwn normaal (numpy array)
             phi = Density * StateVector[time].h**3 / (12 * Viscosity)
 
-            PHI.data[:] = phi
-            DPHIDX.data[:] = DDX @ phi
+            PHI.data = phi
+            DPHIDX.data = DDX @ phi
         
             #1. LHS Pressure
             M = PHI @ D2DX2 + DPHIDX @ DDX

@@ -95,7 +95,7 @@ Discretization=FiniteDifferences(Grid)
 
 
 """ Initialize Reynolds Solver"""
-MaxIterReynolds=6000 # originally 5000
+MaxIterReynolds=8000 # originally 5000
 TolP=1e-4 
 UnderRelaxP=0.001 
 TolT=1e-4 
@@ -144,7 +144,7 @@ else:
     
     """Start from Scratch: Set State Initial Conditions"""
     StateVector[time].Lambda=1.758; 
-    StateVector[time].h0=StateVector[time].Lambda*Contact.Roughness
+    StateVector[time].h0=.5e-6
     StateVector[time].h= StateVector[time].h0 + (4.0*Engine.CompressionRing.CrownHeight/Engine.CompressionRing.Thickness**2.0)*Grid.x**2.0
     StateVector[time].Hersey=0.001*np.abs(Ops.PistonVelocity[time])/np.abs(Ops.CompressionRingLoad[time])
     StateVector[time].Pressure=Ops.AtmosphericPressure+0.0*Grid.x
@@ -166,88 +166,98 @@ else:
 ####################################################################################################################
 ## Test of ReynoldsSolver for a constant film thickness at a given t, without squeeze term or temperature effects ##
 ####################################################################################################################
+StateVector[time].h0=0.5e-6
+StateVector[time].h = StateVector[time].h0+ 4.0 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)
+Reynolds.SolveReynolds(StateVector,time)
+print(StateVector[time].HydrodynamicLoad)
+
+plt.plot(Grid.x,StateVector[time].h)
+plt.show()
+
+plt.plot(Grid.x,StateVector[time].Pressure)
+plt.show()
 
 
-"""Start Time Loop"""
-start_time = TimeKeeper.time()
+# """Start Time Loop"""
+# start_time = TimeKeeper.time()
 
-"""Take a time t (each [time] step is .01ms)"""
-for time in [120, 450, 2000, 3000, 4500]: # Calculation for t = time/100 ms: see plot of U and F vs time; Note: choose t in such a way that U>>0!
+# """Take a time t (each [time] step is .01ms)"""
+# for time in [120]: # Calculation for t = time/100 ms: see plot of U and F vs time; Note: choose t in such a way that U>>0!
     
-    """Initialize State"""
-    # time+=1
-    StateVector[time]=copy.deepcopy(StateVector[t0]) # Use initial state conditions
-    print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
+#     """Initialize State"""
+#     # time+=1
+#     StateVector[time]=copy.deepcopy(StateVector[t0]) # Use initial state conditions
+#     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
 
-    eps_h0 = np.ones(MaxIterLoad+1)
-    Delta_Load = np.zeros(MaxIterLoad)
-    h0_k = np.ones(MaxIterLoad + 1)
-    h0_k *= 5 * 10**(-6)
-    # h0_k[0] = StateVector[time-1].h0
-    # h0_k[1] = h0_k[0] * 1.01
-    k_load = 1
+#     eps_h0 = np.ones(MaxIterLoad+1)
+#     Delta_Load = np.zeros(MaxIterLoad)
+#     h0_k = np.zeros(MaxIterLoad + 1)
+#     # h0_k *= 5 * 10**(-6)
+#     h0_k[0] = StateVector[time-1].h0
+#     h0_k[1] = h0_k[0] * 1.01
+#     k_load = 1
 
-    """Start Load Balance Loop"""
-    #TODO
-    while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
-        """a. Calculate Film Thickness Profile"""
-        StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
+#     """Start Load Balance Loop"""
+#     #TODO
+#     while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
+#         """a. Calculate Film Thickness Profile"""
+#         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
-        """b. Calculate Asperity Load"""
-        StateVector[time].Lambda = h0_k[k_load] / Contact.Roughness     # lambda hier gwn berekenen en min naar asperity contact verplaatsen
-        Contact.AsperityContact(StateVector,time)
+#         """b. Calculate Asperity Load"""
+#         StateVector[time].Lambda = h0_k[k_load] / Contact.Roughness     # lambda hier gwn berekenen en min naar asperity contact verplaatsen
+#         Contact.AsperityContact(StateVector,time)
         
-        """c. Solve Reynolds""" 
-        Reynolds.SolveReynolds(StateVector,time)
+#         """c. Solve Reynolds""" 
+#         Reynolds.SolveReynolds(StateVector,time)
         
-        """d. Newton Raphson Iteration to find the h0"""
+#         """d. Newton Raphson Iteration to find the h0"""
 
-        Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
-        # h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
+#         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
+#         # h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
         
-        """e. Update & Calculate Residual"""      
-        k_load += 1 
+#         """e. Update & Calculate Residual"""      
+#         k_load += 1 
 
-        eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
+#         eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
         
-        """Load Balance Output""" 
-        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
-        if VisualFeedbackLevel>1:
-            fig=vis.Report_PT(Grid,StateVector[time])                       
-            if SaveFig2File:
-                figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
-                fig.savefig(figname, dpi=300)  
-            plt.close(fig)
+#         """Load Balance Output""" 
+#         print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
+#         if VisualFeedbackLevel>1:
+#             fig=vis.Report_PT(Grid,StateVector[time])                       
+#             if SaveFig2File:
+#                 figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
+#                 fig.savefig(figname, dpi=300)  
+#             plt.close(fig)
 
             
 
 
-    """Visual Output per time step""" 
-    if VisualFeedbackLevel>0:
-        vis.Report_Ops(Time,Ops,time)
-        fig=vis.Report_PT(Grid,StateVector[time])
-        if SaveFig2File:
-            figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
-            fig.savefig(figname, dpi=300)
-        plt.close(fig)
+#     """Visual Output per time step""" 
+#     if VisualFeedbackLevel>0:
+#         vis.Report_Ops(Time,Ops,time)
+#         fig=vis.Report_PT(Grid,StateVector[time])
+#         if SaveFig2File:
+#             figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
+#             fig.savefig(figname, dpi=300)
+#         plt.close(fig)
         
 
 
-    """ Calculate Ohter Variables of Interest, e.g. COF wear"""
-    #TODO
-    # StateVector[time].Hersey=
-    # StateVector[time].COF=
-    # Contact.Wear(Ops,Time,StateVector,time)
+#     """ Calculate Ohter Variables of Interest, e.g. COF wear"""
+#     #TODO
+#     # StateVector[time].Hersey=
+#     # StateVector[time].COF=
+#     # Contact.Wear(Ops,Time,StateVector,time)
 
 
-    """Save Output""" 
-    if SaveStates:
-        FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
-        Data2File={'State': StateVector[time]}
-        IO.SaveData(FileName,Data2File)
+#     """Save Output""" 
+#     if SaveStates:
+#         FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+#         Data2File={'State': StateVector[time]}
+#         IO.SaveData(FileName,Data2File)
 
-    """Close all open Figures"""
-    plt.close('all')
+#     """Close all open Figures"""
+#     plt.close('all')
 
 
-print("\n Main Program Completed in %s seconds" % round(TimeKeeper.time() - start_time,0))
+# print("\n Main Program Completed in %s seconds" % round(TimeKeeper.time() - start_time,0))

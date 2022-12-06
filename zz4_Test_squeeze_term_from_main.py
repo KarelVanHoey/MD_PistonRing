@@ -178,8 +178,10 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
 
     eps_h0 = np.ones(MaxIterLoad+1)
     Delta_Load = np.zeros(MaxIterLoad)
-    h0_k = np.zeros(MaxIterLoad + 1)
+    h0_k = np.zeros(MaxIterLoad + 2)
     h0_k[0] = StateVector[time-1].h0
+    print('HELP')
+    print(StateVector[time-1].h0)
     h0_k[1] = h0_k[0] * 1.01
     k_load = 1
     
@@ -214,6 +216,9 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
                figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
                fig.savefig(figname, dpi=300)  
            plt.close(fig)
+        
+        """Save h0 in state vector"""
+        StateVector[time].h0 = h0_k[k_load]
 
             
     
