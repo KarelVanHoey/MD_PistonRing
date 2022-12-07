@@ -34,8 +34,8 @@ class TriboContact:
         self.L = 2 * np.pi * self.Engine.Cylinder.Radius
         self.b = self.Engine.CompressionRing.Thickness
         self.delta = self.Engine.CompressionRing.CrownHeight
-        self.R_cylinder = Engine.Cylinder.Radius
-        self.R_piston = Engine.Piston.Radius
+        # self.R_cylinder = Engine.Cylinder.Radius
+        # self.R_piston = Engine.Piston.Radius
         
         """Wear Coefficients"""
         self.WearCoefficient_Cylinder=2.5e-10
@@ -55,19 +55,29 @@ class TriboContact:
 #################
     def AsperityContact(self,StateVector,time):
 
-        Lambda = min(StateVector[time].Lambda, self.Lambda_c)
+        # Lambda = min(StateVector[time].Lambda, self.Lambda_c)
+        Lambda = StateVector[time].Lambda
 
-        AsperityContactArea = ((np.pi * self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2, Lambda, self.Lambda_c,limit=100)[0]
-        AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * (self.RoughnessParameter ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52, Lambda, self.Lambda_c,limit=100)[0]
-        AsperityFriction = self.Tau0 * AsperityContactArea / self.L + self.f_b * AsperityLoad
+        if Lambda < self.Lambda_c:      # Asperities make contact with cylinder --> Asperity contact area, load and pressure > 0
 
-        R_eq = 1 / ((1 / self.R_cylinder) + (1 / self.R_piston)) # al ergens gedefinieerd?
+            AsperityContactArea = ((np.pi * self.RoughnessParameter) ** 2) * self.L * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I2, Lambda, self.Lambda_c,limit=100)[0]
+            AsperityLoad = 1.06666667 * np.sqrt(2) * np.pi * (self.RoughnessParameter ** 2) * np.sqrt(self.Roughness / self.Kappa) * self.YoungsModulus * np.sqrt(self.Roughness * (self.b ** 2) * 0.25 / self.delta) * integral.quad(self.I52, Lambda, self.Lambda_c,limit=100)[0]
+            AsperityFriction = self.Tau0 * AsperityContactArea / self.L + self.f_b * AsperityLoad
+            StateVector[time].AsperityContactPressure= AsperityLoad / AsperityContactArea       # Nowhere used, but can be plotted
+        
+        else:                           # Chance of asperity contact is zero --> no asperity load
+
+            AsperityContactArea = 0.0
+            AsperityLoad = 0.0
+            AsperityFriction = 0.0
+            StateVector[time].AsperityContactPressure= 0.0       # Nowhere used, but can be plotted
+
+        # R_eq = self.Engine.CompressionRing.Curvature   # Uit paper van Gore et al.: vergeleken met curvature gedefinieerd in Engine, beetje verwarrend want hier: curvature == R_eq uit Engine (normaal gezien: curvature = R^(-1))
 
         StateVector[time].AsperityContactArea= AsperityContactArea
         StateVector[time].AsperityLoad= AsperityLoad
         StateVector[time].AsperityFriction= AsperityFriction
-        StateVector[time].AsperityContactPressure= AsperityLoad / AsperityContactArea
-        StateVector[time].HertzianContactPressure= (np.pi / 4) * np.sqrt((AsperityLoad * self.YoungsModulus) / (np.pi * R_eq))
+        StateVector[time].HertzianContactPressure= (np.pi / 4) * np.sqrt((AsperityLoad * self.YoungsModulus) / (np.pi * self.Engine.CompressionRing.Curvature))
         
         
 #################
