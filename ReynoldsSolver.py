@@ -130,16 +130,16 @@ class ReynoldsSolver:
             
             #5. LHS Temperature ---> Absolute temperaturen!
             # # print(StateVector[time].Pressure)
+            ############# WERKT, MAAR NIET ZO EFFICIENT ############################
+            # pressure_column = sparse.csc_matrix(np.matrix(StateVector[time].Pressure).T)
 
-            pressure_column = sparse.csc_matrix(np.matrix(StateVector[time].Pressure).T)
+            # h212mu = sparse.diags(np.divide(StateVector[time].h**2 , (12 * Viscosity)))
+            # dpdx = DDX @ pressure_column
+            # U2 = self.Ops.SlidingVelocity[time] / 2
 
-            h212mu = sparse.diags(np.divide(StateVector[time].h**2 , (12 * Viscosity)))
-            dpdx = DDX @ pressure_column
-            U2 = self.Ops.SlidingVelocity[time] / 2
-
-            av_u = - np.multiply(h212mu, dpdx) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*U2).T
-            Uaveraged = av_u      
-            
+            # av_u = - np.multiply(h212mu, dpdx) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*U2).T
+            # Uaveraged = av_u      
+            #######################################################################
             # # print('av_u',av_u)
             # u_plus = np.maximum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
             # u_min = np.minimum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
@@ -151,15 +151,15 @@ class ReynoldsSolver:
             # M1 = np.identity(np.shape(av_u)[0]) + D + E
 
             ##### andere manier #####################################
-            # av_u = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
-            # Uaveraged = av_u
+            av_u = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
+            Uaveraged = av_u
 
             # u_plus = np.maximum(av_u, 0)
             # u_min = np.minimum(av_u, 0)
             
-            # UPLUSDT.data[:] = u_plus * self.Time.dt
-            # UMINDT.data[:] = u_min * self.Time.dt
-            # E1.data[:] = Conduc / (Density * SpecHeat
+            # UPLUSDT.data = u_plus * self.Time.dt
+            # UMINDT.data = u_min * self.Time.dt
+            # E1.data = Conduc / (Density * SpecHeat)
 
             # D = UPLUSDT @ DDXForward + UMINDT @ DDXBackward
             # E = - ( E1 * self.Time.dt ) @ D2DX2
@@ -181,21 +181,21 @@ class ReynoldsSolver:
             # # print(RHS2)
             # RHS = RHS1 + RHS2
 
-            ##### ANDERE MANIER #####################################
+            # ##### ANDERE MANIER #####################################
             # Q = StateVector[time].h**2 / (12 * Viscosity) * np.square(DDX @ StateVector[time].Pressure) + Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
             # RHS = StateVector[time-1].Temperature + Q * self.Time.dt / (Density * SpecHeat)
-            #########################################################
+            # #########################################################
 
             # #Boundary conditions
             # if self.Ops.SlidingVelocity[time] <= 0:
-            #     M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] ### Karel: hier moet het denk ik Engine.CompressionRing.Thickness/self.Grid.Nx zijn.
+            #     M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] 
             #     M1[-1, -1] = 1
-            #     M1[0,3:] = 0   ### Karel: niet juist denk ik, alle getallen vanaf 3 in die rij moeten nul zijn --> [0, 3:] (zie voorbeeldje in Test_Sparse_Matrix.py)
-            #     M1[-1,1:-1] = 0  ### Karel: hier moet het [-1, 1:-1] zijn denk ik
+            #     M1[0,3:] = 0  
+            #     M1[-1,1:-1] = 0  
             #     RHS[0] = 0
             #     RHS[-1] = self.Ops.OilTemperature
             # else:
-            #     M1[0,0] = 1     ## Nog eens checken!
+            #     M1[0,0] = 1   
             #     M1[2:, 0] = 0
             #     M1[-1,-2:] = [-1/self.Grid.dx, 1/self.Grid.dx]
             #     M1[-1,1:-2] = 0
