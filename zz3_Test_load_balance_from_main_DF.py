@@ -112,7 +112,7 @@ Delta_Load = 0.0
 """Start from Initial guess or Load Initial State"""
 
 """Start from Scratch: Set State Initial Conditions"""
-time=25
+time=120
 StateVector[time].Lambda=1.758; 
 StateVector[time].h0=StateVector[time].Lambda*Contact.Roughness
 StateVector[time].h= StateVector[time].h0 + (4.0*Engine.CompressionRing.CrownHeight/Engine.CompressionRing.Thickness**2.0)*Grid.x**2.0
@@ -161,13 +161,17 @@ while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0):
         plt.close(fig)
 
 plt.plot(Grid.x,StateVector[time].h)
+plt.title("h")
 plt.show()
 
 plt.plot(Grid.x,StateVector[time].Pressure)
+plt.title("Pressure")
 plt.show()    
 
 plt.semilogy(np.arange(0,MaxIterLoad,1),Delta_Load)
+plt.title("Delta Load")
 plt.show()
 
 plt.plot(np.arange(0,MaxIterLoad+1,1),h0_k)
+plt.title("h0")
 plt.show()

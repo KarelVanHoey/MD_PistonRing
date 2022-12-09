@@ -95,7 +95,7 @@ Discretization=FiniteDifferences(Grid)
 
 
 """ Initialize Reynolds Solver"""
-MaxIterReynolds=6000 # originally 5000
+MaxIterReynolds=20000 # originally 5000
 TolP=1e-4 
 UnderRelaxP=0.001 
 TolT=1e-4 
@@ -126,19 +126,22 @@ StateVector[time].COF=0.0
 StateVector[time].WearDepthRing=0.0
 StateVector[time].WearLocationsCylinder=np.unique(np.round(Ops.PistonPosition,8))
 StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder
+
     
 
 ####################################################################################################################
 ## Test of ReynoldsSolver for a constant film thickness at a given t, without squeeze term or temperature effects ##
 ####################################################################################################################
 
-StateVector[time].h0=0.5e-6
-StateVector[time].h = StateVector[time].h0+ 4.0 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)
+StateVector[time].h0=5e-6
+StateVector[time].h = StateVector[time].h0 + 4.0 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)
 Reynolds.SolveReynolds(StateVector,time)
 print(StateVector[time].HydrodynamicLoad)
 
 plt.plot(Grid.x,StateVector[time].h)
+plt.title("Ring profile")
 plt.show()
 
 plt.plot(Grid.x,StateVector[time].Pressure)
+plt.title("Pressure")
 plt.show()

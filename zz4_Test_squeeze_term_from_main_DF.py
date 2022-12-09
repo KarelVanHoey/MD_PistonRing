@@ -34,7 +34,7 @@ from FluidLibrary import Liquid,Gas #import all classes from file
 from TwoPhaseModel import CavitationModel 
 from SolutionState import State #import all classes from file
 from FiniteDifferences import FiniteDifferences
-from ReynoldsSolver import ReynoldsSolver
+from ReynoldsSolver_DF import ReynoldsSolver
 from IOHDF5 import IOHDF5
 import time as TimeKeeper
 import VisualLib as vis

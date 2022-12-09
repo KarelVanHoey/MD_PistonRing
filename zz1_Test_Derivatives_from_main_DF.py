@@ -81,19 +81,26 @@ D2DX2 = Discretization.D2DX2
 x = Grid.x
 print("x =", x)
 
-fx = x**2.0
-dfx_an = 2.0*x**1.0
-ddfx_an = 0*x
+# fx = x**2.0
+# dfx_an = 2.0*x**1.0
+# ddfx_an = 2*x**0
+
+fx = x**3.0
+dfx_an = 3.0*x**2.0
+ddfx_an = 6*x**1
 
 dfx = DDX @ fx
 print("dfx =", dfx)
 print("dfx_an =", dfx_an)
 ddfx = D2DX2 @ fx
+ddfx2 = DDX @ DDX @ fx
 print("ddxf =", ddfx)
 print("ddxf_an =", ddfx_an)
 
 plt.plot(x,dfx_an,'o',x,dfx,'+')
+plt.title("First Derivative")
 plt.show()
 
-plt.plot(x,ddfx_an,'o',x,ddfx,'+')
+plt.plot(x,ddfx_an,'o',x,ddfx,'+') #,x,ddfx2,'*')
+plt.title("Second derivative")
 plt.show()
