@@ -54,7 +54,7 @@ class ReynoldsSolver:
         ViscosityFunc  =self.FluidModel.DynamicViscosity
         SpecHeatFunc   =self.FluidModel.SpecificHeatCapacity
         ConducFunc     =self.FluidModel.ThermalConductivity      
-        # PreviousDensity    =self.FluidModel.Density(StateVector[time-1]) ## Not used
+        # Density_prev    =self.FluidModel.Density(StateVector[time-1]) ## Not used
         Density_prev = DensityFunc(StateVector[time-1])
 
         PHI = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
@@ -74,7 +74,6 @@ class ReynoldsSolver:
         # SetNeumannLeft=self.Discretization.SetNeumannLeft
         # SetNeumannRight=self.Discretization.SetNeumannRight
         
-        #define your own when desired
         
         #3. Iterate
 
@@ -99,8 +98,8 @@ class ReynoldsSolver:
             
         
             #2. RHS Pressure
-            # squeeze = (Density * StateVector[time].h - Density_prev * StateVector[time-1].h) / self.Time.dt
-            b = self.Ops.SlidingVelocity[time]/2 * (DDX @ (Density * StateVector[time].h)) #+ squeeze
+            squeeze = (Density * StateVector[time].h - Density_prev * StateVector[time-1].h) / self.Time.dt
+            b = self.Ops.SlidingVelocity[time]/2 * (DDX @ (Density * StateVector[time].h)) + squeeze
    
             #3. Set Boundary Conditions Pressure --> NOTE work with absolute pressure!!
 
@@ -142,17 +141,18 @@ class ReynoldsSolver:
             # M1 = np.identity(np.shape(av_u)[0]) + D + E
 
             ##### andere manier #####################################
-            av_u = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
-            u_plus = np.maximum(av_u, 0)
-            u_min = np.minimum(av_u, 0)
+            # av_u = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
+            av_u = 0
+            # u_plus = np.maximum(av_u, 0)
+            # u_min = np.minimum(av_u, 0)
             
-            UPLUSDT.data = u_plus * self.Time.dt
-            UMINDT.data = u_min * self.Time.dt
-            E1.data = Conduc / (Density * SpecHeat)
+            # UPLUSDT.data = u_plus * self.Time.dt
+            # UMINDT.data = u_min * self.Time.dt
+            # E1.data = Conduc / (Density * SpecHeat)
 
-            D = UPLUSDT @ DDXForward + UMINDT @ DDXBackward
-            E = - ( E1 * self.Time.dt ) @ D2DX2
-            M1 = I + D + E
+            # D = UPLUSDT @ DDXForward + UMINDT @ DDXBackward
+            # E = - ( E1 * self.Time.dt ) @ D2DX2
+            # M1 = I + D + E
 
             #########################################################
 
@@ -170,38 +170,38 @@ class ReynoldsSolver:
             # # print(RHS2)
             # RHS = RHS1 + RHS2
 
-            # ##### ANDERE MANIER #####################################
-            Q = StateVector[time].h**2 / (12 * Viscosity) * np.square(DDX @ StateVector[time].Pressure) + Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
-            RHS = StateVector[time-1].Temperature + Q * self.Time.dt / (Density * SpecHeat)
-            # #########################################################
+            # # ##### ANDERE MANIER #####################################
+            # Q = StateVector[time].h**2 / (12 * Viscosity) * np.square(DDX @ StateVector[time].Pressure) + Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
+            # RHS = StateVector[time-1].Temperature + Q * self.Time.dt / (Density * SpecHeat)
+            # # #########################################################
 
-            #Boundary conditions
-            if self.Ops.SlidingVelocity[time] <= 0:
-                M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] 
-                M1[-1, -1] = 1
-                M1[0,3:] = 0  
-                M1[-1,1:-1] = 0  
-                RHS[0] = 0
-                RHS[-1] = self.Ops.OilTemperature
-            else:
-                M1[0,0] = 1   
-                M1[2:, 0] = 0
-                M1[-1,-2:] = [-1/self.Grid.dx, 1/self.Grid.dx]
-                M1[-1,1:-2] = 0
-                RHS[0] = self.Ops.OilTemperature
-                RHS[-1] = 0
-            #7. Solve System for Temperature + Update
+            # #Boundary conditions
+            # if self.Ops.SlidingVelocity[time] <= 0:
+            #     M1[0,0:1] = [-1/self.Grid.dx, 1/self.Grid.dx] 
+            #     M1[-1, -1] = 1
+            #     M1[0,3:] = 0  
+            #     M1[-1,1:-1] = 0  
+            #     RHS[0] = 0
+            #     RHS[-1] = self.Ops.OilTemperature
+            # else:
+            #     M1[0,0] = 1   
+            #     M1[2:, 0] = 0
+            #     M1[-1,-2:] = [-1/self.Grid.dx, 1/self.Grid.dx]
+            #     M1[-1,1:-2] = 0
+            #     RHS[0] = self.Ops.OilTemperature
+            #     RHS[-1] = 0
+            # #7. Solve System for Temperature + Update
 
-            T_star = linalg.spsolve(M1, RHS)
-            delta_T = T_star - StateVector[time].Temperature
-            StateVector[time].Temperature += delta_T * self.UnderRelaxT
-            # print("Temp")
-            # print( StateVector[time].Temperature)
+            # T_star = linalg.spsolve(M1, RHS)
+            # delta_T = T_star - StateVector[time].Temperature
+            # StateVector[time].Temperature += delta_T * self.UnderRelaxT
+            # # print("Temp")
+            # # print( StateVector[time].Temperature)
 
-            Density = DensityFunc(StateVector[time])
-            SpecHeat = SpecHeatFunc(StateVector[time])
-            Viscosity = ViscosityFunc(StateVector[time])
-            Conduc = ConducFunc(StateVector[time])
+            # Density = DensityFunc(StateVector[time])
+            # SpecHeat = SpecHeatFunc(StateVector[time])
+            # Viscosity = ViscosityFunc(StateVector[time])
+            # Conduc = ConducFunc(StateVector[time])
             
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
             #################################################################################################################
@@ -213,7 +213,7 @@ class ReynoldsSolver:
             k += 1
 
             epsP[k] = np.linalg.norm(Delta_p / StateVector[time].Pressure) / self.Grid.Nx
-            epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
+            # epsT[k] = np.linalg.norm(np.divide(delta_T, StateVector[time].Temperature)) / self.Grid.Nx
 
 
            
