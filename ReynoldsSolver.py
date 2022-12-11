@@ -142,7 +142,7 @@ class ReynoldsSolver:
             # M1 = np.identity(np.shape(av_u)[0]) + D + E
 
             ##### andere manier #####################################
-            av_u = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
+            av_u = - StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
             u_plus = np.maximum(av_u, 0)
             u_min = np.minimum(av_u, 0)
             
