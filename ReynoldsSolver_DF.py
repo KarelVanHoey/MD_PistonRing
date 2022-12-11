@@ -247,6 +247,8 @@ class ReynoldsSolver:
         StateVector[time].HydrodynamicLoad = np.trapz(StateVector[time].Pressure, dx=self.Grid.dx)
         # print("Help2")
         # print( StateVector[time].HydrodynamicLoad)
-        # WallShearStress = Viscosity *()         #Uit cursus gehaald, idk of dit correct is...
+        WallShearStress_0 = Viscosity * ((self.Ops.SlidingVelocity[time-1]-self.Ops.SlidingVelocity[time])/StateVector[time].h) - (DDX @ StateVector[time].Pressure)*(StateVector[time].h/2) #Uit cursus gehaald, idk of dit correct is...
+        WallShearStress_h = Viscosity * ((self.Ops.SlidingVelocity[time-1]-self.Ops.SlidingVelocity[time])/StateVector[time].h) - (DDX @ StateVector[time].Pressure)*(StateVector[time].h/2)
+        StateVector[time].WallShearStress = WallShearStress_h
 
 

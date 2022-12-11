@@ -220,7 +220,7 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
         """Save h0 in state vector"""
         StateVector[time].h0 = h0_k[k_load]
         # toegevoegd
-        #StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)
+        StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)
     
             
     
