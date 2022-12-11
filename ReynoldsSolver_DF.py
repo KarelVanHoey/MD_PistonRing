@@ -129,21 +129,8 @@ class ReynoldsSolver:
             # Conduc = ConducFunc(StateVector[time])
             
             #5. LHS Temperature ---> Absolute temperaturen!
-            # # print(StateVector[time].Pressure)
-
             #Uaveraged = 0
-            
-            # # print('av_u',av_u)
-            # u_plus = np.maximum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
-            # u_min = np.minimum(av_u.T.toarray()[0], np.zeros(np.shape(av_u)[0])) 
-            # u_plus_sparse = sparse.diags(u_plus) * self.Time.dt
-            # u_min_sparse = sparse.diags(u_min) * self.Time.dt
-            # D = u_plus_sparse @ DDXForward  + u_min_sparse @ DDXBackward
-            # E1 = - Conduc / (Density * SpecHeat) * self.Time.dt
-            # E = sparse.diags(E1) @ D2DX2
-            # M1 = np.identity(np.shape(av_u)[0]) + D + E
 
-            ##### andere manier #####################################
             av_u = - StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
             Uaveraged = av_u
 
@@ -158,26 +145,9 @@ class ReynoldsSolver:
             E = - E1 @ D2DX2
             M1 = I + D + E
 
-            #########################################################
-
             # #6. RHS Temperature
-            # Q_term2 = Viscosity * self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2
-
-            # # print(sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T)
-            # # print(sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T)
-
-            # Q = np.multiply(h212mu, sparse.csc_matrix(np.square(dpdx.toarray().T[0])).T) + sparse.csc_matrix(np.ones(np.shape(pressure_column)[0])*Q_term2).T
-            # # print('q', Q)
-
-            # RHS1 = sparse.csc_matrix(np.matrix(StateVector[time-1].Temperature).T)
-            # RHS2 = self.Time.dt * sparse.diags((Density*SpecHeat)**-1) @ Q # Niels: ik moet nog eens checken als dit wel zeker correct is
-            # # print(RHS2)
-            # RHS = RHS1 + RHS2
-
-            ##### ANDERE MANIER #####################################
             Q = StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure)**2 + Viscosity *( self.Ops.SlidingVelocity[time]**2 / StateVector[time].h**2 )
             RHS = StateVector[time-1].Temperature + self.Time.dt * Q / (Density * SpecHeat)
-            #########################################################
 
             #Boundary conditions
             if self.Ops.SlidingVelocity[time] <= 0:
@@ -203,14 +173,7 @@ class ReynoldsSolver:
             T_star = linalg.spsolve(M1, RHS)
             delta_T = T_star - StateVector[time].Temperature
             StateVector[time].Temperature += delta_T * self.UnderRelaxT
-            # print("Temp")
-            # print( StateVector[time].Temperature)
 
-            # Density = DensityFunc(StateVector[time])
-            # SpecHeat = SpecHeatFunc(StateVector[time])
-            # Viscosity = ViscosityFunc(StateVector[time])
-            # Conduc = ConducFunc(StateVector[time])
-            
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
             #################################################################################################################
             ### Opmerking: moet dit nu hier of moet dit pas in stap 11? --> lijkt mij nutteloos om dit hier te berekenen. ###
