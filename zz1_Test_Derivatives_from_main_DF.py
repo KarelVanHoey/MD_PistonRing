@@ -44,7 +44,7 @@ Contact=TriboContact(Engine)
 
 
 # """1D Computational Grid"""
-Nodes=10 #;
+Nodes=6 #;
 Grid=Grid(Contact,Nodes)
 
 # """Temporal Discretization"""
@@ -74,33 +74,38 @@ Discretization=FiniteDifferences(Grid)
 # print(Grid.dx)
 
 DDX = Discretization.DDXCentral
-# print("DDX =", np.round(DDX.toarray(),2))
+print("DDX =", np.round(DDX.toarray(),2))
+DDX_fw = Discretization.DDXForward
+print("DDX_fw =", np.round(DDX_fw.toarray(),2))
+DDX_bw = Discretization.DDXBackward
+print("DDX_bw =", np.round(DDX_bw.toarray(),2))
+
 D2DX2 = Discretization.D2DX2
-# print("D2DX2 =", np.round(D2DX2.toarray(), 2))
+print("D2DX2 =", np.round(D2DX2.toarray(), 2))
 
-x = Grid.x
-print("x =", x)
+# x = Grid.x
+# print("x =", x)
 
-# fx = x**2.0
-# dfx_an = 2.0*x**1.0
-# ddfx_an = 2*x**0
+# # fx = x**2.0
+# # dfx_an = 2.0*x**1.0
+# # ddfx_an = 2*x**0
 
-fx = x**3.0
-dfx_an = 3.0*x**2.0
-ddfx_an = 6*x**1
+# fx = x**3.0
+# dfx_an = 3.0*x**2.0
+# ddfx_an = 6*x**1
 
-dfx = DDX @ fx
-print("dfx =", dfx)
-print("dfx_an =", dfx_an)
-ddfx = D2DX2 @ fx
-ddfx2 = DDX @ DDX @ fx
-print("ddxf =", ddfx)
-print("ddxf_an =", ddfx_an)
+# dfx = DDX @ fx
+# print("dfx =", dfx)
+# print("dfx_an =", dfx_an)
+# ddfx = D2DX2 @ fx
+# ddfx2 = DDX @ DDX @ fx
+# print("ddxf =", ddfx)
+# print("ddxf_an =", ddfx_an)
 
-plt.plot(x,dfx_an,'o',x,dfx,'+')
-plt.title("First Derivative")
-plt.show()
+# plt.plot(x,dfx_an,'o',x,dfx,'+')
+# plt.title("First Derivative")
+# plt.show()
 
-plt.plot(x,ddfx_an,'o',x,ddfx,'+') #,x,ddfx2,'*')
-plt.title("Second derivative")
-plt.show()
+# plt.plot(x,ddfx_an,'o',x,ddfx,'+') #,x,ddfx2,'*')
+# plt.title("Second derivative")
+# plt.show()

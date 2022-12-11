@@ -150,7 +150,7 @@ class ReynoldsSolver:
             UMINDT.data = u_min * self.Time.dt
             E1.data = Conduc / (Density * SpecHeat)
 
-            D = UPLUSDT @ DDXForward + UMINDT @ DDXBackward
+            D = UPLUSDT @ DDXBackward + UMINDT @ DDXForward
             E = - ( E1 * self.Time.dt ) @ D2DX2
             M1 = I + D + E
 
