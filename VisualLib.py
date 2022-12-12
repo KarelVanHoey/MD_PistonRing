@@ -26,7 +26,7 @@ def Report_PT(Grid,State): # initiatlization
     ax2.plot(Grid.x,State.Temperature-273.15,'x-', linewidth=1,color=color)
     ax2.tick_params(axis='y')
     f1.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.show()
+    # plt.show()
     return f1
     
 
@@ -47,5 +47,35 @@ def Report_Ops(Time,Ops,time):
     ax2.plot(Time.t,Ops.CompressionRingLoad,'-',Time.t[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
     ax2.tick_params(axis='y')
     f2.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.show()
+    # plt.show()
     return f2
+
+def Report_Ops_PT(Time,Ops,time, Grid,State):
+    fig, axs = plt.subplots(2)
+    color = 'tab:blue'
+    axs[0].set_xlabel('$t [s]$')
+    axs[0].set_ylabel('$U [m/s]$',color=color)
+    axs[0].plot(Time.t,Ops.SlidingVelocity,'-',Time.t[time],Ops.SlidingVelocity[time],'ko', linewidth=1,color=color)
+    axs[0].tick_params(axis='y')
+    ax2 = axs[0].twinx()  # instantiate a second axes that shares the same x-axis
+    color = 'tab:red'
+    ax2.set_ylabel('$F [N/m]$',color=color)  # we already handled the x-label with ax1
+    ax2.plot(Time.t,Ops.CompressionRingLoad,'-',Time.t[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
+    ax2.tick_params(axis='y')
+    
+
+    color = 'tab:blue'
+    axs[1].set_xlabel('$x [m]$')
+    axs[1].set_ylabel('$P [MPa]$',color=color)
+    axs[1].plot(Grid.x,State.Pressure/1e6,'x-', linewidth=1,color=color)
+    axs[1].tick_params(axis='y')
+    ax3 = axs[1].twinx()  # instantiate a second axes that shares the same x-axis
+    color = 'tab:red'
+    ax3.set_ylabel('$T [^\circ C]$',color=color)  # we already handled the x-label with ax1
+    ax3.plot(Grid.x,State.Temperature-273.15,'x-', linewidth=1,color=color)
+    ax3.tick_params(axis='y')
+    # ax3.set_ylim([0,5.5])
+    axs[1].set_ylim([0,3.5])
+    fig.tight_layout()  # otherwise the right y-label is slightly clipped
+    # plt.show()
+    return fig

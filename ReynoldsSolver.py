@@ -122,7 +122,6 @@ class ReynoldsSolver:
             #Uaveraged = 0
 
             av_u = - StateVector[time].h**2 / (12 * Viscosity) * (DDX @ StateVector[time].Pressure) + self.Ops.SlidingVelocity[time] / 2
-            Uaveraged = av_u
 
             u_plus = np.maximum(av_u, 0)
             u_min = np.minimum(av_u, 0)

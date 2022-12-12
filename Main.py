@@ -42,7 +42,7 @@ import VisualLib as vis
 
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=False # Save figures to file? True/False
+SaveFig2File=True # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
 SaveStates=False # Save States to File? True/False
@@ -70,7 +70,7 @@ Nodes=256 #;
 Grid=Grid(Contact,Nodes)
 
 """Temporal Discretization"""
-TimeStep=1e-5 # Choose Temperal Resolution 
+TimeStep=5e-5 # Choose Temperal Resolution (original 1e-5)
 EndTime=4.0*np.pi/(EngineRPM*(2.0*np.pi/60.0))
 Time=Time(EndTime,TimeStep)
 
@@ -106,7 +106,7 @@ Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedb
 """ Set Load Balance loop"""
 MaxIterLoad= 41 #originally 40
 Tolh0=1e-3 
-UnderRelaxh0=0.2
+UnderRelaxh0=0.25
 Delta_Load = 0.0
 
 """Start from Initial guess or Load Initial State"""
@@ -222,11 +222,14 @@ while time<Time.nt:
     if VisualFeedbackLevel>0:
         vis.Report_Ops(Time,Ops,time)
         fig=vis.Report_PT(Grid,StateVector[time])
-        if SaveFig2File:
+        # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
+        if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
             fig.savefig(figname, dpi=300)
         plt.close(fig)
-        
+    
+    
+       
     
     
     """ Calculate Ohter Variables of Interest, e.g. COF wear"""

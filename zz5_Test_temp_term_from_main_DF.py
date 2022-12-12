@@ -44,7 +44,7 @@ import VisualLib as vis
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
-InitTime=0.0 #Initial Time to Load, originally 0.0
+InitTime=0.00119 #Initial Time to Load [s], originally 0.0
 SaveStates=False # Save States to File? True/False
 
 """I/O Operator"""
@@ -104,8 +104,8 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad= 40 #originally 40
-Tolh0=1e-3 #;
+MaxIterLoad= 60 #originally 40
+Tolh0=1e-4 #;
 UnderRelaxh0=0.2
 Delta_Load = 0.0
 
