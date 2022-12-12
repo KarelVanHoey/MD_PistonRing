@@ -21,8 +21,8 @@ class FiniteDifferences:
         
         #Schemes for first-order (D) and second order (DD) derivatives
         self.CentralStencilD=np.array([-1.0,0.0,1.0])/(2.0*Grid.dx)
-        self.BackwardStencilD=np.array([-1.0,1.0])/Grid.dx
-        self.ForwardStencilD=np.array([-1.0,1.0])/Grid.dx
+        self.BackwardStencilD=np.array([0.0,-1.0,1.0])/Grid.dx
+        self.ForwardStencilD=np.array([-1.0,1.0,0.0])/Grid.dx
         
         self.CentralStencilDD=np.array([1.0, -2.0, 1.0])/(Grid.dx**2)
 
@@ -36,14 +36,14 @@ class FiniteDifferences:
 
         # First derivatives (DDX)
         self.DDXCentral=sparse.diags(self.CentralStencilD, [-1, 0, 1], shape=(Grid.Nx, Grid.Nx), dtype='float', format="csr")
-        self.DDXCentral[-1,-2:]=self.BackwardStencilD #Define right boundary stencil
-        self.DDXCentral[0,:2]=self.ForwardStencilD #Define left boundary stencil
+        self.DDXCentral[-1,-3:]=self.BackwardStencilD #Define right boundary stencil
+        self.DDXCentral[0,:3]=self.ForwardStencilD #Define left boundary stencil
 
-        self.DDXBackward=sparse.diags(self.BackwardStencilD, [-1, 0], shape=(Grid.Nx, Grid.Nx), dtype='float', format='csr')
-        self.DDXBackward[0,:2]=self.ForwardStencilD
+        self.DDXBackward=sparse.diags(self.BackwardStencilD, [-2, -1, 0], shape=(Grid.Nx, Grid.Nx), dtype='float', format='csr')
+        self.DDXBackward[0,:3]=self.ForwardStencilD
 
-        self.DDXForward=sparse.diags(self.ForwardStencilD, [0, 1], shape=(Grid.Nx, Grid.Nx), dtype='float', format='csr')
-        self.DDXForward[-1,-2:]=self.BackwardStencilD
+        self.DDXForward=sparse.diags(self.ForwardStencilD, [0, 1, 2], shape=(Grid.Nx, Grid.Nx), dtype='float', format='csr')
+        self.DDXForward[-1,-3:]=self.BackwardStencilD
         
         # Second Derivative (D2DX2)
         self.D2DX2=sparse.diags(self.CentralStencilDD, [-1, 0, 1], shape=(Grid.Nx, Grid.Nx), dtype='float', format='csr')
@@ -61,7 +61,7 @@ class FiniteDifferences:
         M.data[[-3,-2,-1]]=[0.0, 0.0, 1.0]
     
     def SetNeumannLeft(self,M):
-        M.data[[0,1,2]]=self.BackwardStencilD
+        M.data[[0,1,2]]=self.ForwardStencilD
     
     def SetNeumannRight(self,M):
-        M.data[[-3,-2,-1]]=self.ForwardStencilD
+        M.data[[-3,-2,-1]]=self.BackwardStencilD
