@@ -41,11 +41,11 @@ import VisualLib as vis
 
 
 """General Settings for Input and Output """
-VisualFeedbackLevel=0 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
+VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
-SaveStates=True # Save States to File? True/False
+SaveStates=False # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -175,17 +175,26 @@ while time<Time.nt:
 
     eps_h0 = np.ones(MaxIterLoad+1)
     Delta_Load = np.ones(MaxIterLoad)
-    # Delta_Load[1] = 10
     h0_k = np.zeros(MaxIterLoad + 2)
     h0_k[0] = StateVector[time-1].h0
     h0_k[1] = h0_k[0] * 1.01
     k_load = 1
-    
+
+    # """Test"""
+    # StateVector[time].h_worn = np.array([max(.25*Engine.CompressionRing.CrownHeight, i) for i in 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)]) + h0_k[k_load]
+    # StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
+
+    # plt.plot(StateVector[time].h,label='original')
+    # plt.plot(StateVector[time].h_worn,label='worn')
+    # plt.legend()
+    # plt.show()
+
+
     """Start Load Balance Loop"""
     #TODO
     while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) > .99:# and (eps_h0[k_load] > Tolh0): #
         """a. Calculate Film Thickness Profile"""
-        StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
+        StateVector[time].h = np.array([min(.75*Engine.CompressionRing.CrownHeight, i) for i in 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)]) + h0_k[k_load]
         
         """b. Calculate Asperity Load"""
         StateVector[time].Lambda = h0_k[k_load] / Contact.Roughness     # lambda hier gwn berekenen en min naar asperity contact verplaatsen
@@ -197,7 +206,6 @@ while time<Time.nt:
         """d. Newton Raphson Iteration to find the h0"""
 
         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
-        # print(Delta_Load[k_load])
         h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
         
         

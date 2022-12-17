@@ -94,14 +94,14 @@ for time in range(Time.nt-1):
     StateVector[time].AsperityContactPressure=float(Data['State']['AsperityContactPressure']) # ok
     StateVector[time].HertzianContactPressure=float(Data['State']['HertzianContactPressure']) # ok
     StateVector[time].COF=float(Data['State']['COF']) # ok 
-    # StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # NOT ok?
+    StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # ok?
     
     StateVector[time].h= Data['State']['h'] # ok
     StateVector[time].Pressure=Data['State']['Pressure'] # ok
     StateVector[time].Temperature=Data['State']['Temperature'] # ok
     StateVector[time].WallShearStress=Data['State']['WallShearStress'] # ok
     StateVector[time].WearLocationsCylinder=Data['State']['WearLocationsCylinder'] # ok
-    # StateVector[time].WearDepthCylinder=Data['State']['WearDepthCylinder']  # NOT ok?
+    StateVector[time].WearDepthCylinder=Data['State']['WearDepthCylinder']  # ok?
     
     time+=1
     

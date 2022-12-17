@@ -12,16 +12,23 @@ IO=IOHDF5()
 #     print(max(data))
 #     print(data[:15])
 
-time = 0.05 #ms
+# time = [np.round(i,2) for i in np.arange(0.05, 7.50, 0.05 )] #ms
+
+# for t in time:
+#     FileName='Data/Time_'+str(t)+'ms.h5'
+#     Data=IO.ReadData(FileName)['State']
+
+#     if Data['WearDepthCylinder'].any() != 0:
+#         print("Not equal to zero!")
+#     # print(Data['State'])
+
+time = 0.25
 FileName='Data/Time_'+str(time)+'ms.h5'
 Data=IO.ReadData(FileName)
-
-# print(Data['State'])
-
 for key in Data['State']:
     print(key +": " + str(Data['State'][key][0]) )
 
-# print(Data['State']["Viscosity"][0])
-# print("ring")
-# print(Data['State']["WearDepthRing"])
+
+print("ring")
+print(Data['State']["WearDepthCylinder"])
 

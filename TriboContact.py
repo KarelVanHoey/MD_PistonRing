@@ -85,7 +85,7 @@ class TriboContact:
 #################       
     def Wear(self,Ops,Time,StateVector,time):
         
-        p_tmin1 = StateVector[time-1].HertzianContactPressure
+        # p_tmin1 = StateVector[time-1].HertzianContactPressure
         p_t = StateVector[time].HertzianContactPressure
         s_t = Ops.SlidingDistance[time-1]
 
@@ -96,8 +96,8 @@ class TriboContact:
             s_tmin1 = 0.0
 
         # Calculate Wear Depth on the Piston Ring
-        StateVector[time].WearDepthRing= StateVector[time-1].WearDepthRing + self.WearCoefficient_CompressionRing / self.Engine.CompressionRing.Material.Hardness * (p_tmin1 + p_t) * 0.5 * (s_t - s_tmin1) # accumulated wear depth on the ring         
-            
+        # StateVector[time].WearDepthRing= StateVector[time-1].WearDepthRing + self.WearCoefficient_CompressionRing / self.Engine.CompressionRing.Material.Hardness * (p_tmin1 + p_t) * 0.5 * (s_t - s_tmin1) # accumulated wear depth on the ring         
+        StateVector[time].WearDepthRing = StateVector[time-1].WearDepthRing + self.WearCoefficient_CompressionRing / self.Engine.CompressionRing.Material.Hardness * p_t * (s_t - s_tmin1) # accumulated wear depth on the ring   
         # Calculate The Wear Depth on the Cylinder wall
 
             # assumptions: From asperity contact size, the height of the contact zone is determined. Uniform wear due to p_Hertz is assumed in that zone. The position of the piston in the cylinder is known, so the wear zone is known.
@@ -108,5 +108,6 @@ class TriboContact:
         
         StateVector[time].WearLocationsCylinder = np.unique(np.round(Ops.PistonPosition,8))
         WearIncrement = np.zeros(np.size(StateVector[time].WearLocationsCylinder))
-        WearIncrement[StateVector[time].WearLocationsCylinder.index(np.round(Ops.PistonPosition[time],8))] += self.WearCoefficient_Cylinder / self.Engine.Cylinder.Material.Hardness * p_t * np.abs(Ops.PistonVelocity[time]) * Time.dt
+        # WearIncrement[StateVector[time].WearLocationsCylinder.index(np.round(Ops.PistonPosition[time],8))] += self.WearCoefficient_Cylinder / self.Engine.Cylinder.Material.Hardness * p_t * np.abs(Ops.PistonVelocity[time]) * Time.dt
+        WearIncrement[np.where(StateVector[time].WearLocationsCylinder == np.round(Ops.PistonPosition[time],8))[0][0]] += self.WearCoefficient_Cylinder / self.Engine.Cylinder.Material.Hardness * p_t * np.abs(Ops.PistonVelocity[time]) * Time.dt
         StateVector[time].WearDepthCylinder = StateVector[time - 1].WearDepthCylinder + WearIncrement
