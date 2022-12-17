@@ -83,25 +83,25 @@ for time in range(Time.nt-1):
     FileName='Data/Solution_Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
-    StateVector[time].h0=float(Data['State']['h0'])
-    StateVector[time].Hersey=float(Data['State']['Hersey'])
-    StateVector[time].Lambda=float(Data['State']['Lambda'])
-    StateVector[time].HydrodynamicLoad=float(Data['State']['HydrodynamicLoad'])
-    StateVector[time].ViscousFriction=float(Data['State']['ViscousFriction'])
-    StateVector[time].AsperityLoad=float(Data['State']['AsperityLoad'])
-    StateVector[time].AsperityFriction=float(Data['State']['AsperityFriction'])
-    StateVector[time].AsperityContactArea=float(Data['State']['AsperityContactArea'])
-    StateVector[time].AsperityContactPressure=float(Data['State']['AsperityContactPressure'])
-    StateVector[time].HertzianContactPressure=float(Data['State']['HertzianContactPressure'])
-    StateVector[time].COF=float(Data['State']['COF'])
-    StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing'])
+    StateVector[time].h0=float(Data['State']['h0']) # ok
+    StateVector[time].Hersey=float(Data['State']['Hersey']) # ok
+    StateVector[time].Lambda=float(Data['State']['Lambda']) # ok
+    StateVector[time].HydrodynamicLoad=float(Data['State']['HydrodynamicLoad']) # ok
+    StateVector[time].ViscousFriction=float(Data['State']['ViscousFriction'])   # ok
+    StateVector[time].AsperityLoad=float(Data['State']['AsperityLoad']) # ok
+    StateVector[time].AsperityFriction=float(Data['State']['AsperityFriction']) # ok
+    StateVector[time].AsperityContactArea=float(Data['State']['AsperityContactArea']) # ok
+    StateVector[time].AsperityContactPressure=float(Data['State']['AsperityContactPressure']) # ok
+    StateVector[time].HertzianContactPressure=float(Data['State']['HertzianContactPressure']) # ok
+    StateVector[time].COF=float(Data['State']['COF']) # ok 
+    # StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # NOT ok?
     
-    StateVector[time].h= Data['State']['h']
-    StateVector[time].Pressure=Data['State']['Pressure']
-    StateVector[time].Temperature=Data['State']['Temperature']
-    StateVector[time].WallShearStress=Data['State']['WallShearStress']
-    StateVector[time].WearLocationsCylinder=Data['State']['WearLocationsCylinder']
-    StateVector[time].WearDepthCylinder=Data['State']['WearDepthCylinder']
+    StateVector[time].h= Data['State']['h'] # ok
+    StateVector[time].Pressure=Data['State']['Pressure'] # ok
+    StateVector[time].Temperature=Data['State']['Temperature'] # ok
+    StateVector[time].WallShearStress=Data['State']['WallShearStress'] # ok
+    StateVector[time].WearLocationsCylinder=Data['State']['WearLocationsCylinder'] # ok
+    # StateVector[time].WearDepthCylinder=Data['State']['WearDepthCylinder']  # NOT ok?
     
     time+=1
     

@@ -56,6 +56,7 @@ class ReynoldsSolver:
         ConducFunc     =self.FluidModel.ThermalConductivity      
         # Density_prev    =self.FluidModel.Density(StateVector[time-1]) ## Not used
         Density_prev = DensityFunc(StateVector[time-1])
+        VapourVolumeFractionFunc = self.FluidModel.VapourVolumeFraction
 
         PHI = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
         DPHIDX = sparse.identity(self.Grid.Nx, dtype='float', format="csr")
@@ -86,6 +87,11 @@ class ReynoldsSolver:
             SpecHeat = SpecHeatFunc(StateVector[time])
             Viscosity = ViscosityFunc(StateVector[time])
             Conduc = ConducFunc(StateVector[time])
+            VapourVolumeFraction = VapourVolumeFractionFunc(StateVector[time])
+
+            StateVector[time].Viscosity = Viscosity
+            StateVector[time].Density = Density
+            StateVector[time].VapourVolumeFraction = VapourVolumeFraction
             
             # print(Viscosity)
             phi = Density * StateVector[time].h**3 / (12 * Viscosity)
@@ -196,13 +202,10 @@ class ReynoldsSolver:
 
             
         #11. Calculate other quantities (e.g. Wall Shear Stress, Hydrodynamic Load, ViscousFriction)
+        
         StateVector[time].HydrodynamicLoad = np.trapz(StateVector[time].Pressure, dx=self.Grid.dx)
-        # print("Help")
-        # print(phi)
-        # print("Help2")
-        # print(PHI)
-        # print("Help2")
-        # print( StateVector[time].HydrodynamicLoad)
-        # WallShearStress = Viscosity *()         #Uit cursus gehaald, idk of dit correct is...
-
+        # WallShearStress_0 = Viscosity * self.Ops.SlidingVelocity / StateVector[time].h  - (DDX @ StateVector[time].Pressure) * StateVector[time].h /2
+        WallShearStress_h = Viscosity * self.Ops.SlidingVelocity[time] / StateVector[time].h  + (DDX @ StateVector[time].Pressure) * StateVector[time].h /2
+        StateVector[time].WallShearStress = WallShearStress_h
+        StateVector[time].ViscousFriction = np.trapz(StateVector[time].WallShearStress, dx=self.Grid.dx)
 

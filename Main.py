@@ -42,10 +42,10 @@ import VisualLib as vis
 
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=True # Save figures to file? True/False
+SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
-SaveStates=False # Save States to File? True/False
+SaveStates=True # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -169,7 +169,7 @@ while time<Time.nt:
     
     
     """Initialize State"""
-    time+=1
+    time += 1
     StateVector[time]=copy.deepcopy(StateVector[time-1])
     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
 
@@ -197,9 +197,8 @@ while time<Time.nt:
 
         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
         h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
-        # print("Help!")
-        # print("Load" + str( StateVector[time].HydrodynamicLoad))
-        # print("Delta " +str(Delta_Load[k_load] - Delta_Load[k_load - 1]))
+        
+        
         """e. Update & Calculate Residual"""      
         k_load += 1 
 
@@ -232,11 +231,11 @@ while time<Time.nt:
        
     
     
-    """ Calculate Ohter Variables of Interest, e.g. COF wear"""
+    """ Calculate Other Variables of Interest, e.g. COF wear"""
     #TODO
-    # StateVector[time].Hersey=
-    # StateVector[time].COF=
-    # Contact.Wear(Ops,Time,StateVector,time)
+    StateVector[time].Hersey = Ops.SlidingVelocity[time] * StateVector[time].Viscosity / StateVector[time].HydrodynamicLoad
+    StateVector[time].COF= (StateVector[time].ViscousFriction + StateVector[time].AsperityFriction) / StateVector[time].HydrodynamicLoad  
+    Contact.Wear(Ops,Time,StateVector,time)
  
     
     """Save Output""" 

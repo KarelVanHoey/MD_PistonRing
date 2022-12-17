@@ -29,7 +29,7 @@ class CavitationModel:
 
     def Density(self,State):
         alpha=self.VapourVolumeFraction(State)
-        Density= (1.0-alpha)*self.Oil.EOS_Density(State)                   + alpha*self.Vapour.EOS_Density(State)
+        Density= (1.0-alpha)*self.Oil.EOS_Density(State) + alpha*self.Vapour.EOS_Density(State)
         return Density
 
     def DynamicViscosity(self,State):
