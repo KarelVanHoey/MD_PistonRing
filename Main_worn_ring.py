@@ -42,10 +42,10 @@ import VisualLib as vis
 
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=False # Save figures to file? True/False
+SaveFig2File=True # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
-SaveStates=False # Save States to File? True/False
+SaveStates=True # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -192,7 +192,7 @@ while time<Time.nt:
 
     """Start Load Balance Loop"""
     #TODO
-    while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) > .99:# and (eps_h0[k_load] > Tolh0): #
+    while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) >= 1:# and (eps_h0[k_load] > Tolh0): #
         """a. Calculate Film Thickness Profile"""
         StateVector[time].h = np.array([min(.75*Engine.CompressionRing.CrownHeight, i) for i in 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)]) + h0_k[k_load]
         
@@ -215,7 +215,9 @@ while time<Time.nt:
         eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
        
         """Load Balance Output""" 
-        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
+        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]")
+        print("Load Balance:: Residuals [DeltaLoad] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(Delta_Load[k_load - 1],2),"N]\n")
+
         if VisualFeedbackLevel>1:
            fig=vis.Report_PT(Grid,StateVector[time])                       
            if SaveFig2File:
@@ -233,7 +235,7 @@ while time<Time.nt:
         fig=vis.Report_PT(Grid,StateVector[time])
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
-            figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
+            figname="Figures_worn/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
@@ -250,7 +252,7 @@ while time<Time.nt:
     
     """Save Output""" 
     if SaveStates:
-        FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_worn/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 

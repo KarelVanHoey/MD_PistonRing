@@ -183,7 +183,7 @@ while time<Time.nt:
     
     """Start Load Balance Loop"""
     #TODO
-    while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) > .99:# and (eps_h0[k_load] > Tolh0): #
+    while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) >= 1:# and (eps_h0[k_load] > Tolh0): #
         """a. Calculate Film Thickness Profile"""
         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
