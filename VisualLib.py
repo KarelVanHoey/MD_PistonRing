@@ -26,7 +26,7 @@ def Report_PT(Grid,State): # initiatlization
     ax2.plot(Grid.x,State.Temperature-273.15,'x-', linewidth=1,color=color)
     ax2.tick_params(axis='y')
     f1.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.show()
+    # plt.show()
     return f1
     
 
@@ -47,7 +47,7 @@ def Report_Ops(Time,Ops,time):
     ax2.plot(Time.t,Ops.CompressionRingLoad,'-',Time.t[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
     ax2.tick_params(axis='y')
     f2.tight_layout()  # otherwise the right y-label is slightly clipped
-    plt.show()
+    # plt.show()
     return f2
 
 def Report_Ops_PT(Time,Ops,time, Grid,State):
