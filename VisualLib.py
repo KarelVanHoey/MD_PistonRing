@@ -12,12 +12,15 @@ import matplotlib.pyplot as plt
 
 
     
-def Report_PT(Grid,State): # initiatlization
+def Report_PT(Grid,State,time=None): # initiatlization
 
     f1, ax1 = plt.subplots()
     color = 'tab:blue'
     ax1.set_xlabel('$x [m]$')
-    ax1.set_ylabel('$P [MPa]$',color=color)
+    if time is not None:
+        ax1.set_ylabel('$P [MPa]$ at time =' + str(time),color=color)
+    else:
+        ax1.set_ylabel('$P [MPa]$',color=color)
     ax1.plot(Grid.x,State.Pressure/1e6,'x-', linewidth=1,color=color)
     ax1.tick_params(axis='y')
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis

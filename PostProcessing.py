@@ -27,6 +27,7 @@ from TwoPhaseModel import CavitationModel
 from SolutionState import State #import all classes from file
 from FiniteDifferences import FiniteDifferences
 from IOHDF5 import IOHDF5
+import VisualLib as vis
 
 # from IPython import get_ipython
 # get_ipython().magic('reset -sf')
@@ -109,6 +110,57 @@ for time in range(Time.nt-1):
     
 
 """Post-Processing"""
-#################
-##### TO DO #####
-#################   
+
+
+# Dimensionless film thickness as function of crank angle
+
+Lambda_values = np.zeros(Time.nt - 1)
+
+for time in range(Time.nt - 1):
+    Lambda_values[time] = StateVector[time]
+
+plt.plot(Ops.CranckAngle, Lambda_values, 'bo')
+plt.xlabel('Crank angle [rad]')
+plt.ylabel('Dimensionless film thickness [-]')
+plt.show()
+
+
+# Stribeck curve
+
+COF_values = np.zeros(Time.nt-1)
+Hersey_values = np.zeros(Time.nt - 1)
+
+for time in range(Time.nt - 1):
+    COF_values[time] = StateVector[time].COF
+    Hersey_values[time] = StateVector[time].Hersey
+
+plt.plot(Hersey_values, COF_values, 'bo')
+plt.xlabel('Hersey number [-]')
+plt.ylabel('Coefficient of Friction [-]')
+plt.show()
+
+
+# Characteristic pressure & temperature fields at interesting and relevant locations
+
+interesting_timestamps = []
+for time in interesting_timestamps:
+    vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib
+
+
+# 2D vectorplot of flow velocity at relevant locations
+
+    ## To be done:  calculate time derivative of h0 for v2 (v1=0)
+    ##              implement formulas from slide 17 in Hydrodyn Theory slides
+
+# interesting_timestamps = []
+# for time in interesting_timestamps:
+#     x_grid = Grid.x
+#     z_n = 100
+#     z_grid = np.linspace(0.0, StateVector[time].h[0], z_n)
+#     u1 = 0
+#     u2 = Ops.PistonVelocity[time] # or SlidingVelocity ? idk
+#     u_x = np.zeros((Grid.nx, z_n))
+#     u_z = np.zeros((Grid.nx, z_n))
+#     for x in range(Grid.nx):
+#         for z in range(z_n):
+            
