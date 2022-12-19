@@ -81,11 +81,12 @@ Discretization=FiniteDifferences(Grid)
 """Read Data"""
 time=0
 for time in range(Time.nt-1):
-    FileName='Data/Solution_Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName='Data/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     StateVector[time].h0=float(Data['State']['h0']) # ok
-    StateVector[time].Hersey=float(Data['State']['Hersey']) # ok
+    # print("Hersey =", Data['State']['Hersey'])
+    StateVector[time].Hersey=Data['State']['Hersey'] # ok
     StateVector[time].Lambda=float(Data['State']['Lambda']) # ok
     StateVector[time].HydrodynamicLoad=float(Data['State']['HydrodynamicLoad']) # ok
     StateVector[time].ViscousFriction=float(Data['State']['ViscousFriction'])   # ok
@@ -96,6 +97,7 @@ for time in range(Time.nt-1):
     StateVector[time].HertzianContactPressure=float(Data['State']['HertzianContactPressure']) # ok
     StateVector[time].COF=float(Data['State']['COF']) # ok 
     StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # ok?
+    # StateVector[time].Viscosity=Data['State']['Viscosity']
     
     StateVector[time].h= Data['State']['h'] # ok
     StateVector[time].Pressure=Data['State']['Pressure'] # ok
@@ -112,27 +114,35 @@ for time in range(Time.nt-1):
 """Post-Processing"""
 
 
-# Dimensionless film thickness as function of crank angle
+interesting_timestamps = [1, 100]
+
+## Dimensionless film thickness as function of crank angle
+
+# for time in range(Time.nt - 1):
+#     if time % 100 == 1:
+#         # print("Hersey =", StateVector[time].Hersey)
+#         plt.plot(Grid.x, StateVector[time].Hersey)
+#         plt.show()
 
 Lambda_values = np.zeros(Time.nt - 1)
+Hersey_values = np.zeros(Time.nt - 1)
+COF_values = np.zeros(Time.nt-1)
 
 for time in range(Time.nt - 1):
-    Lambda_values[time] = StateVector[time]
+    Lambda_values[time] = StateVector[time].Lambda
+    Hersey_values[time] = abs(np.mean(StateVector[time].Hersey))
+    COF_values[time] = abs(StateVector[time].COF)
 
-plt.plot(Ops.CranckAngle, Lambda_values, 'bo')
+plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
 plt.xlabel('Crank angle [rad]')
 plt.ylabel('Dimensionless film thickness [-]')
 plt.show()
 
 
-# Stribeck curve
+## Stribeck curve
 
-COF_values = np.zeros(Time.nt-1)
-Hersey_values = np.zeros(Time.nt - 1)
 
-for time in range(Time.nt - 1):
-    COF_values[time] = StateVector[time].COF
-    Hersey_values[time] = StateVector[time].Hersey
+# Hersey_values = np.zeros(Time.nt - 1)
 
 plt.plot(Hersey_values, COF_values, 'bo')
 plt.xlabel('Hersey number [-]')
@@ -140,20 +150,23 @@ plt.ylabel('Coefficient of Friction [-]')
 plt.show()
 
 
-# Characteristic pressure & temperature fields at interesting and relevant locations
+## Characteristic pressure & temperature fields at interesting and relevant locations
 
-interesting_timestamps = []
-for time in interesting_timestamps:
-    vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib
+# for time in interesting_timestamps:
+#     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib
 
 
-# 2D vectorplot of flow velocity at relevant locations
+## 2D vectorplot of flow velocity at relevant locations
 
     ## To be done:  calculate time derivative of h0 for v2 (v1=0)
     ##              implement formulas from slide 17 in Hydrodyn Theory slides
 
 # interesting_timestamps = []
 # for time in interesting_timestamps:
+#     visc_x = StateVector[time].Viscosity
+#     p = StateVector[time].Pressure
+#     p_x = Discretization.DDXCentral @ p
+#     p_y = 0.0
 #     x_grid = Grid.x
 #     z_n = 100
 #     z_grid = np.linspace(0.0, StateVector[time].h[0], z_n)
@@ -163,4 +176,25 @@ for time in interesting_timestamps:
 #     u_z = np.zeros((Grid.nx, z_n))
 #     for x in range(Grid.nx):
 #         for z in range(z_n):
-            
+
+
+## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
+
+# WearDepthRing_values = np.zeros(Time.nt - 1)
+# WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
+
+# for time in range(Time.nt - 1):
+#     WearDepthRing_values[time] = StateVector[time]
+
+# plt.plot(Time.t, WearDepthRing_values, 'bo')
+# plt.xlabel('Crank angle [rad]')
+# plt.ylabel('Dimensionless film thickness [-]')
+# plt.show()
+
+
+
+# for time in interesting_timestamps:
+#     plt.plot(StateVector[time].WearLocationsCylinder, StateVector[time].WearDepthCylinder, 'bo')
+#     plt.xlabel('Location on cylinder liner [m]')
+#     plt.ylabel('Wear depth [m]')
+#     plt.show()

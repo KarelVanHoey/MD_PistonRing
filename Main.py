@@ -237,8 +237,8 @@ while time<Time.nt:
     
     """ Calculate Other Variables of Interest, e.g. COF wear"""
     #TODO
-    StateVector[time].Hersey = Ops.SlidingVelocity[time] * StateVector[time].Viscosity / StateVector[time].HydrodynamicLoad
-    StateVector[time].COF= (StateVector[time].ViscousFriction + StateVector[time].AsperityFriction) / StateVector[time].HydrodynamicLoad  
+    StateVector[time].Hersey = abs(Ops.SlidingVelocity[time]) * StateVector[time].Viscosity / StateVector[time].HydrodynamicLoad
+    StateVector[time].COF= (StateVector[time].ViscousFriction + StateVector[time].AsperityFriction) / StateVector[time].HydrodynamicLoad
     Contact.Wear(Ops,Time,StateVector,time)
  
     
