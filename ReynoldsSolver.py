@@ -152,7 +152,7 @@ class ReynoldsSolver:
                 # M1[-1,1:-1] = 0  
                 SetNeumannLeft(M1)
                 SetDirichletRight(M1)
-                RHS[0] = 0
+                RHS[0] = 0.0
                 RHS[-1] = self.Ops.OilTemperature
             else:
                 # M1[0,0] = 1     
@@ -162,11 +162,12 @@ class ReynoldsSolver:
                 SetDirichletLeft(M1)
                 SetNeumannRight(M1)
                 RHS[0] = self.Ops.OilTemperature
-                RHS[-1] = 0
+                RHS[-1] = 0.0
             #7. Solve System for Temperature + Update
 
             T_star = linalg.spsolve(M1, RHS)
-            delta_T = T_star - StateVector[time].Temperature
+            # delta_T = T_star - StateVector[time].Temperature
+            delta_T = np.maximum(T_star,self.Ops.OilTemperature) - StateVector[time].Temperature
             StateVector[time].Temperature += delta_T * self.UnderRelaxT
             
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)

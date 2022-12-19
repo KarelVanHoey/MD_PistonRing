@@ -44,7 +44,7 @@ import VisualLib as vis
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
-InitTime=0.00119 #Initial Time to Load [s], originally 0.0
+InitTime=0.0 #0.00119 #Initial Time to Load [s], originally 0.0
 SaveStates=False # Save States to File? True/False
 
 """I/O Operator"""
@@ -104,9 +104,9 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad= 60 #originally 40
-Tolh0=1e-4 #;
-UnderRelaxh0=0.2
+MaxIterLoad= 41 #originally 40
+Tolh0=1e-3 #;
+UnderRelaxh0=0.25
 Delta_Load = 0.0
 
 """Start from Initial guess or Load Initial State"""
@@ -172,20 +172,21 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
     
     
     """Initialize State"""
-    time+=1
+    time += 1
     StateVector[time]=copy.deepcopy(StateVector[time-1])
     print("Time Loop:: Start Calculation @ Time:",round(Time.t[time]*1000,5),"ms \n")
 
     eps_h0 = np.ones(MaxIterLoad+1)
-    Delta_Load = np.zeros(MaxIterLoad)
-    h0_k = np.zeros(MaxIterLoad + 1)
-    h0_k[0] = StateVector[time].h0
+    Delta_Load = np.ones(MaxIterLoad)
+    # Delta_Load[1] = 10
+    h0_k = np.zeros(MaxIterLoad + 2)
+    h0_k[0] = StateVector[time-1].h0
     h0_k[1] = h0_k[0] * 1.01
     k_load = 1
     
     """Start Load Balance Loop"""
     #TODO
-    while (k_load < MaxIterLoad) and (eps_h0[k_load] > Tolh0): 
+    while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) >= 1:# and (eps_h0[k_load] > Tolh0): #
         """a. Calculate Film Thickness Profile"""
         StateVector[time].h = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2) + h0_k[k_load]
         
@@ -199,7 +200,9 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
         """d. Newton Raphson Iteration to find the h0"""
 
         Delta_Load[k_load] = StateVector[time].HydrodynamicLoad + StateVector[time].AsperityLoad - Ops.CompressionRingLoad[time]
+        # print(Delta_Load[k_load])
         h0_k[k_load + 1] = max(h0_k[k_load] - UnderRelaxh0 * ((Delta_Load[k_load]) / (Delta_Load[k_load] - Delta_Load[k_load - 1])) * (h0_k[k_load] - h0_k[k_load - 1]), 0.1 * Contact.Roughness)
+        
         
         """e. Update & Calculate Residual"""      
         k_load += 1 
@@ -207,7 +210,8 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
         eps_h0[k_load] = abs(h0_k[k_load] / h0_k[k_load - 1] - 1) 
        
         """Load Balance Output""" 
-        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]\n")
+        print("Load Balance:: Residuals [h0] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(eps_h0[k_load],2+int(np.abs(np.log10(Tolh0)))),"]")
+        print("Load Balance:: Residuals [DeltaLoad] @Time:",round(Time.t[time]*1000,5),"ms & Iteration:",k_load,"-> [",np.round(Delta_Load[k_load - 1],2),"N]\n")
         if VisualFeedbackLevel>1:
            fig=vis.Report_PT(Grid,StateVector[time])                       
            if SaveFig2File:
@@ -215,18 +219,21 @@ while time < InitTime*10**5 + 3: #InitTime + x: Load balance for first x/100 ms 
                fig.savefig(figname, dpi=300)  
            plt.close(fig)
 
-        StateVector[time].h0=h0_k[k_load]
-        StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)
+        StateVector[time].h0 = h0_k[k_load]
+        StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
+    
     
     """Visual Output per time step""" 
     if VisualFeedbackLevel>0:
         vis.Report_Ops(Time,Ops,time)
         fig=vis.Report_PT(Grid,StateVector[time])
-        if SaveFig2File:
+        print(StateVector[time].Temperature)
+
+        # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
+        if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
             fig.savefig(figname, dpi=300)
         plt.close(fig)
-        
     
     
     """ Calculate Ohter Variables of Interest, e.g. COF wear"""
