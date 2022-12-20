@@ -80,7 +80,7 @@ Discretization=FiniteDifferences(Grid)
 
 """Read Data"""
 time=0
-for time in range(Time.nt-1):
+for time in [100]:# range(1,Time.nt-1):
     FileName='Data/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
@@ -96,8 +96,8 @@ for time in range(Time.nt-1):
     StateVector[time].AsperityContactPressure=float(Data['State']['AsperityContactPressure']) # ok
     StateVector[time].HertzianContactPressure=float(Data['State']['HertzianContactPressure']) # ok
     StateVector[time].COF=float(Data['State']['COF']) # ok 
-    StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # ok?
-    # StateVector[time].Viscosity=Data['State']['Viscosity']
+    StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # ok
+    StateVector[time].Viscosity=Data['State']['Viscosity'] # ok
     
     StateVector[time].h= Data['State']['h'] # ok
     StateVector[time].Pressure=Data['State']['Pressure'] # ok
@@ -133,10 +133,10 @@ for time in range(Time.nt - 1):
     Hersey_values[time] = abs(np.mean(StateVector[time].Hersey))
     COF_values[time] = abs(StateVector[time].COF)
 
-plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
-plt.xlabel('Crank angle [rad]')
-plt.ylabel('Dimensionless film thickness [-]')
-plt.show()
+# plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
+# plt.xlabel('Crank angle [rad]')
+# plt.ylabel('Dimensionless film thickness [-]')
+# plt.show()
 
 
 ## Stribeck curve
@@ -144,10 +144,10 @@ plt.show()
 
 # Hersey_values = np.zeros(Time.nt - 1)
 
-plt.plot(Hersey_values, COF_values, 'bo')
-plt.xlabel('Hersey number [-]')
-plt.ylabel('Coefficient of Friction [-]')
-plt.show()
+# plt.plot(Hersey_values, COF_values, 'bo')
+# plt.xlabel('Hersey number [-]')
+# plt.ylabel('Coefficient of Friction [-]')
+# plt.show()
 
 
 ## Characteristic pressure & temperature fields at interesting and relevant locations
@@ -161,21 +161,55 @@ plt.show()
     ## To be done:  calculate time derivative of h0 for v2 (v1=0)
     ##              implement formulas from slide 17 in Hydrodyn Theory slides
 
-# interesting_timestamps = []
-# for time in interesting_timestamps:
-#     visc_x = StateVector[time].Viscosity
-#     p = StateVector[time].Pressure
-#     p_x = Discretization.DDXCentral @ p
-#     p_y = 0.0
-#     x_grid = Grid.x
-#     z_n = 100
-#     z_grid = np.linspace(0.0, StateVector[time].h[0], z_n)
-#     u1 = 0
-#     u2 = Ops.PistonVelocity[time] # or SlidingVelocity ? idk
-#     u_x = np.zeros((Grid.nx, z_n))
-#     u_z = np.zeros((Grid.nx, z_n))
-#     for x in range(Grid.nx):
-#         for z in range(z_n):
+interesting_timestamps = [100]
+for time in interesting_timestamps:
+    visc_x = StateVector[time].Viscosity
+    density = Mixture.Density(StateVector[time])
+    p = StateVector[time].Pressure
+    p_x = Discretization.DDXCentral @ p
+    DDX = Discretization.DDXCentral
+    p_y = 0.0
+    x_grid = Grid.x
+    z_n = Grid.Nx
+    h = StateVector[time].h
+    
+    u1 = 0
+    u2 = Ops.SlidingVelocity[time] # or PistonVelocity ? idk
+    Nx = Grid.Nx
+    u_x = np.zeros((z_n, Nx))
+    u_z = np.zeros((z_n, Nx))
+
+    z_grid = np.linspace(0.0, h[0], z_n)
+    
+    for x in range(Grid.Nx):
+        u_x[:, x] = np.array([1/visc_x[x] * p_x[x] * 1/2 * (z**2 - h[x] * z) if z < h[x] else 0 for z in z_grid])  # Poiseuille
+        u_x[:, x] += np.array([(u2 - u1) / h[x] * z + u1 if z < h[x] else 0 for z in z_grid])                      # Couette
+        # Note: list comprehension is used to get zero for points "inside" of the ring in the vector plot
+
+        u_z[:, x] = np.trapz(1/density[x] * DDX @ (density[x] * u_x[:, x]),z_grid)*10000
+
+    ## Reduce amount of datapoint used to generate vectors. Note: plt.quiver wants the same amount of elements in X and Y!
+    skip = 10
+    skip1 = (slice(None, None, skip))
+    skip2 = (slice(None, None, skip), slice(None, None, skip))
+
+    ## Make grid for vectors
+    X, Z = np.meshgrid(x_grid[skip1], z_grid[skip1])
+
+    X_l, Z_l = np.meshgrid((x_grid[:Nx//2])[skip1], (z_grid)[skip1])
+    X_r, Z_r = np.meshgrid((x_grid[Nx//2+1:])[skip1], (z_grid)[skip1])
+
+
+    ## Make vector plot
+    plt.quiver(X,Z,u_x[skip2],u_z[skip2],minlength=0,scale=350)
+
+    ### (Un)comment following two line to ensure that no vector crosses the ring.
+    # plt.quiver(X_l,Z_l,(u_x[:,:Nx//2])[skip2],(u_z[:,:Nx//2])[skip2],minlength=0,pivot='tip',scale=350)
+    # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
+
+    plt.plot(x_grid, StateVector[time].h)
+    plt.show()
+            
 
 
 ## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
@@ -198,3 +232,6 @@ plt.show()
 #     plt.xlabel('Location on cylinder liner [m]')
 #     plt.ylabel('Wear depth [m]')
 #     plt.show()
+
+
+
