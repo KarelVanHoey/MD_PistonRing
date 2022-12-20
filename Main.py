@@ -226,7 +226,8 @@ while time<Time.nt:
         fig=vis.Report_PT(Grid,StateVector[time])
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
-            figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
+            # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
+            figname="Figures/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
@@ -236,8 +237,8 @@ while time<Time.nt:
     
     """ Calculate Other Variables of Interest, e.g. COF wear"""
     #TODO
-    StateVector[time].Hersey = Ops.SlidingVelocity[time] * StateVector[time].Viscosity / StateVector[time].HydrodynamicLoad
-    StateVector[time].COF= (StateVector[time].ViscousFriction + StateVector[time].AsperityFriction) / StateVector[time].HydrodynamicLoad  
+    StateVector[time].Hersey = abs(Ops.SlidingVelocity[time]) * StateVector[time].Viscosity / StateVector[time].HydrodynamicLoad
+    StateVector[time].COF= (StateVector[time].ViscousFriction + StateVector[time].AsperityFriction) / StateVector[time].HydrodynamicLoad
     Contact.Wear(Ops,Time,StateVector,time)
  
     

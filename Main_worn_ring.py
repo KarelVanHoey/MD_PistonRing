@@ -235,7 +235,8 @@ while time<Time.nt:
         fig=vis.Report_PT(Grid,StateVector[time])
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
-            figname="Figures_worn/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
+            # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
+            figname="Figures/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
