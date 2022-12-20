@@ -194,7 +194,7 @@ while time<Time.nt:
     #TODO
     while (k_load < MaxIterLoad) and abs(Delta_Load[k_load-1]) >= 1:# and (eps_h0[k_load] > Tolh0): #
         """a. Calculate Film Thickness Profile"""
-        StateVector[time].h = np.array([min(.75*Engine.CompressionRing.CrownHeight, i) for i in 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)]) + h0_k[k_load]
+        StateVector[time].h = np.array([max(.25*Engine.CompressionRing.CrownHeight, i) for i in 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)]) + h0_k[k_load]
         
         """b. Calculate Asperity Load"""
         StateVector[time].Lambda = h0_k[k_load] / Contact.Roughness     # lambda hier gwn berekenen en min naar asperity contact verplaatsen
