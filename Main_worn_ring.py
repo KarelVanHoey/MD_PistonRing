@@ -116,7 +116,7 @@ time=(np.abs(Time.t - InitTime)).argmin()
 if LoadInitialState:
     
     """Start from previous solution: Load Data at t=0"""
-    FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+    FileName='Data_worn/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
     Data=IO.ReadData(FileName)
     StateVector[time].h0=float(Data['State']['h0'])
     StateVector[time].Hersey=float(Data['State']['Hersey'])
@@ -157,7 +157,7 @@ else:
     StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder
     
     if SaveStates:
-        FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_worn/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         #Data2File={'Grid': Grid,'Time': Time,'State': StateVector[time]}
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
@@ -239,7 +239,7 @@ while time<Time.nt:
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
-            figname="Figures/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
+            figname="Figures_worn/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
