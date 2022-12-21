@@ -26,7 +26,7 @@ import numpy as np
 import copy as copy
 
 from EngineParts import Engine  #import all classes from file
-from TriboContact import TriboContact #import all classes from file
+from TriboContact_worn import TriboContact #import all classes from file
 from Grid import Grid #import all classes from file
 from Time import Time #import all classes from file
 from Ops import Ops #import all classes from file
