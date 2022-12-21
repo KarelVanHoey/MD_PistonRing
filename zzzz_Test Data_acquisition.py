@@ -67,13 +67,17 @@ Time=Time(EndTime,TimeStep)
 #         print("Not equal to zero!")
 #     # print(Data['State'])
 
-time = 0.0
+time = 26.90
 FileName='Data/Time_'+str(time)+'ms.h5'
 Data=IO.ReadData(FileName)['State']
-# print(Data['Viscosity'])
+print(Data['WearDepthCylinder'])
 # print(round(Time.t[1]*1000,4))
-for i in Data:
-    print(i)
+# for i in Data:
+#     print(i)
+
+# greek_letterz=[chr(code) for code in range(945,970)]
+
+# print(greek_letterz)
 
 # print(Data['WearLocationsCylinder'])
 # print(Data['WearDepthCylinder'])
