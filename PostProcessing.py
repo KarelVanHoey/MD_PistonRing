@@ -210,7 +210,7 @@ for time in interesting_timestamps:
         u_x[:, x] += np.array([(u2 - u1) / h[x] * z + u1 if z < h[x] else 0 for z in z_grid])                      # Couette
         # Note: list comprehension is used to get zero for points "inside" of the ring in the vector plot
 
-        u_z[:, x] = np.trapz(1/density[x] * DDX @ (density[x] * u_x[:, x]),z_grid)*10000
+        # u_z[:, x] = np.trapz(1/density[x] * DDX @ (density[x] * u_x[:, x]),z_grid)*10000
 
     ## Reduce amount of datapoint used to generate vectors. Note: plt.quiver wants the same amount of elements in X and Y!
     skip = 10
