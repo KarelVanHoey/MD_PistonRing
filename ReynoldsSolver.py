@@ -12,6 +12,7 @@ import scipy.sparse as sparse # Sparse Matrix Definitions and operations
 import scipy.sparse.linalg as linalg # Sparse Matrix Linear Algebra
 import matplotlib.pyplot as plt
 import VisualLib as vis
+import cv2
 
 class ReynoldsSolver:
     def __init__(self,Grid,Time,Ops,FluidModel,Discretization):
@@ -76,6 +77,9 @@ class ReynoldsSolver:
         SetNeumannRight=self.Discretization.SetNeumannRight
         
         
+        ### Test
+        pmax = []
+        Tmax = []
         #3. Iterate
 
         k=0
@@ -122,7 +126,8 @@ class ReynoldsSolver:
 
             ## Update pressure
             StateVector[time].Pressure += self.UnderRelaxP * Delta_p
-            
+            # if max(StateVector[time].Temperature) > 1e100:
+            # print(StateVector[time].Pressure)
             
             #5. LHS Temperature ---> Absolute temperaturen!
             #Uaveraged = 0
@@ -169,6 +174,8 @@ class ReynoldsSolver:
             # delta_T = T_star - StateVector[time].Temperature
             delta_T = np.maximum(T_star,self.Ops.OilTemperature) - StateVector[time].Temperature
             StateVector[time].Temperature += delta_T * self.UnderRelaxT
+            # if np.max(StateVector[time].Temperature) > 1e10:
+            #     StateVector[time].Temperature = np.ones(len(StateVector[time].Temperature)) * self.Ops.OilTemperature
             
             #8. Calculate other quantities: Hydrodynamic load (eq. 37 in assignment), Wall shear stress, Viscous friction force (store all in StateVector)
             #################################################################################################################
@@ -182,8 +189,23 @@ class ReynoldsSolver:
             epsP[k] = np.linalg.norm(Delta_p / StateVector[time].Pressure) / self.Grid.Nx
             epsT[k] = np.linalg.norm(delta_T / StateVector[time].Temperature) / self.Grid.Nx
 
+            # if max(StateVector[time].Temperature) > 300 + 273.15:
+            #     print('Pmax= ' + str(max(StateVector[time].Pressure)/10**6))
+            #     print('Tmax= ' + str(max(StateVector[time].Temperature)))
+            pmax.append(max(StateVector[time].Pressure)/10**6)
+            Tmax.append(max(StateVector[time].Temperature))
+            if max(StateVector[time].Temperature) > 1000:
+                fig, ax1 = plt.subplots()
 
-           
+                ax2 = ax1.twinx()
+                ax1.plot( pmax, 'g-')
+                ax2.plot(Tmax, 'b-')
+
+                ax1.set_xlabel('p data')
+                ax1.set_ylabel('p data', color='g')
+                ax2.set_ylabel('T data', color='b')
+
+                plt.show()
             #10. Provide a plot of the solution
             if (k % 500 == 0):
                 CFL=np.max(av_u)*self.Time.dt/self.Grid.dx
@@ -191,6 +213,8 @@ class ReynoldsSolver:
                 if self.VisualFeedbackLevel>2:
                     fig=vis.Report_PT(self.Grid,StateVector[time]) 
                     plt.close(fig)
+                # print('Pmax= ' + str(max(StateVector[time].Pressure)))
+                # print('Tmax= ' + str(max(StateVector[time].Temperature)))
 
                 
             if (epsP[k]<=self.TolP) and (epsT[k]<=self.TolT):

@@ -80,7 +80,7 @@ Discretization=FiniteDifferences(Grid)
 
 """Read Data"""
 time=0
-for time in [100]:# range(1,Time.nt-1):
+for time in range(1,Time.nt-1): # [100]:# 
     FileName='Data/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
@@ -98,6 +98,8 @@ for time in [100]:# range(1,Time.nt-1):
     StateVector[time].COF=float(Data['State']['COF']) # ok 
     StateVector[time].WearDepthRing=float(Data['State']['WearDepthRing']) # ok
     StateVector[time].Viscosity=Data['State']['Viscosity'] # ok
+    StateVector[time].VapourVolumeFraction=Data['State']['VapourVolumeFraction']
+    StateVector[time].Density=Data['State']['Density']
     
     StateVector[time].h= Data['State']['h'] # ok
     StateVector[time].Pressure=Data['State']['Pressure'] # ok
@@ -153,7 +155,29 @@ for time in range(Time.nt - 1):
 ## Characteristic pressure & temperature fields at interesting and relevant locations
 
 # for time in interesting_timestamps:
-#     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib
+#     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
+#     plt.show()
+
+### Vapour volume fraction, viscosity, Density at relavant locations
+interesting_timestamps = [100]
+# for time in interesting_timestamps:
+    # plt.plot(Grid.x,StateVector[time].VapourVolumeFraction)
+    # plt.ylabel(chr(945) + ' [-]')
+    # plt.xlabel('x [mm]')
+    # plt.show()
+
+    # plt.plot(Grid.x,StateVector[time].Density)
+    # plt.ylabel('Density [kg/m³]')
+    # plt.xlabel('x [mm]')
+    # plt.show()
+
+    # plt.plot(Grid.x,StateVector[time].Viscosity)
+    # plt.ylabel('Viscosity [Pa s]')
+    # plt.xlabel('x [mm]')
+    # plt.show()
+    
+
+
 
 
 ## 2D vectorplot of flow velocity at relevant locations
@@ -201,37 +225,37 @@ for time in interesting_timestamps:
 
 
     ## Make vector plot
-    plt.quiver(X,Z,u_x[skip2],u_z[skip2],minlength=0,scale=350)
+    # plt.quiver(X,Z,u_x[skip2],u_z[skip2],minlength=0,scale=350)
 
-    ### (Un)comment following two line to ensure that no vector crosses the ring.
-    # plt.quiver(X_l,Z_l,(u_x[:,:Nx//2])[skip2],(u_z[:,:Nx//2])[skip2],minlength=0,pivot='tip',scale=350)
-    # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
+    # ### (Un)comment following two line to ensure that no vector crosses the ring.
+    # # plt.quiver(X_l,Z_l,(u_x[:,:Nx//2])[skip2],(u_z[:,:Nx//2])[skip2],minlength=0,pivot='tip',scale=350)
+    # # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
 
-    plt.plot(x_grid, StateVector[time].h)
-    plt.show()
+    # plt.plot(x_grid, StateVector[time].h)
+    # plt.show()
             
 
 
 ## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
 
-# WearDepthRing_values = np.zeros(Time.nt - 1)
-# WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
+WearDepthRing_values = np.zeros(Time.nt - 1)
+WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
 
-# for time in range(Time.nt - 1):
-#     WearDepthRing_values[time] = StateVector[time]
+for time in range(Time.nt - 1):
+    WearDepthRing_values[time] = StateVector[time].WearDepthRing
 
-# plt.plot(Time.t, WearDepthRing_values, 'bo')
-# plt.xlabel('Crank angle [rad]')
-# plt.ylabel('Dimensionless film thickness [-]')
+# plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
+# plt.xlabel('time [s]')
+# plt.ylabel('Weardepth ring [mm]')
 # plt.show()
 
-
-
-# for time in interesting_timestamps:
-#     plt.plot(StateVector[time].WearLocationsCylinder, StateVector[time].WearDepthCylinder, 'bo')
-#     plt.xlabel('Location on cylinder liner [m]')
-#     plt.ylabel('Wear depth [m]')
-#     plt.show()
+interesting_timestamps = [998]
+for time in interesting_timestamps:
+    plt.plot(StateVector[time].WearLocationsCylinder*1000, StateVector[time].WearDepthCylinder, 'bo')
+    plt.xlabel('Location on cylinder liner [mm]')
+    plt.ylabel('Wear depth [m]')
+    # plt.xlim([0, 95.5])
+    plt.show()
 
 
 

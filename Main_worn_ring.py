@@ -43,9 +43,9 @@ import VisualLib as vis
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=True # Save figures to file? True/False
-LoadInitialState=False # Load The InitialState? True/False
-InitTime=0.0 #Initial Time to Load?
-SaveStates=True # Save States to File? True/False
+LoadInitialState=True # Load The InitialState? True/False
+InitTime=0.02685 #Initial Time to Load?
+SaveStates=False # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -99,15 +99,15 @@ MaxIterReynolds=5000
 TolP=1e-4 
 UnderRelaxP=0.001 
 TolT=1e-4 
-UnderRelaxT=0.01 
+UnderRelaxT=0.01
 Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
 MaxIterLoad= 41 #originally 40
 Tolh0=1e-3 
-UnderRelaxh0=0.25
-Delta_Load = 0.0
+UnderRelaxh0=0.4
+# Delta_Load = 0.0
 
 """Start from Initial guess or Load Initial State"""
 
@@ -116,10 +116,10 @@ time=(np.abs(Time.t - InitTime)).argmin()
 if LoadInitialState:
     
     """Start from previous solution: Load Data at t=0"""
-    FileName='Data_worn/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+    FileName='Data_worn_v3/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
     Data=IO.ReadData(FileName)
     StateVector[time].h0=float(Data['State']['h0'])
-    StateVector[time].Hersey=float(Data['State']['Hersey'])
+    StateVector[time].Hersey=Data['State']['Hersey']
     StateVector[time].Lambda=float(Data['State']['Lambda'])
     StateVector[time].HydrodynamicLoad=float(Data['State']['HydrodynamicLoad'])
     StateVector[time].ViscousFriction=float(Data['State']['ViscousFriction'])
@@ -166,6 +166,9 @@ h_template = 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.Comp
 h_transl = h_template - 0.25 * Engine.CompressionRing.CrownHeight
 h_capped = np.maximum(h_transl, 0)
 
+# print(Ops.SlidingVelocity[time])
+vis.Report_Ops(Time,Ops,time)
+plt.show()
 """Start Time Loop"""
 start_time = TimeKeeper.time()
 while time<Time.nt:
@@ -231,6 +234,8 @@ while time<Time.nt:
         StateVector[time].h0 = h0_k[k_load]
         StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
     
+    plt.plot(Delta_Load)
+    plt.show()
     
     """Visual Output per time step""" 
     if VisualFeedbackLevel>0:
@@ -239,7 +244,7 @@ while time<Time.nt:
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
-            figname="Figures_worn/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
+            figname="Test_fig/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
@@ -256,7 +261,7 @@ while time<Time.nt:
     
     """Save Output""" 
     if SaveStates:
-        FileName='Data_worn/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Test_fig/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 
