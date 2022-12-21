@@ -167,9 +167,9 @@ h_transl = h_template - 0.25 * Engine.CompressionRing.CrownHeight
 h_capped = np.maximum(h_transl, 0)
 
 # print(Ops.SlidingVelocity[time])
-vis.Report_Ops(Time,Ops,time)
-plt.show()
-print(Ops.PistonPosition)
+# vis.Report_Ops(Time,Ops,time)
+# plt.show()
+# print(Ops.PistonPosition)
 """Start Time Loop"""
 start_time = TimeKeeper.time()
 while time<Time.nt:
