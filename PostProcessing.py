@@ -139,7 +139,8 @@ plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
 plt.xlabel('Crank angle [rad]')
 plt.ylabel('Dimensionless film thickness [-]')
 plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
-plt.show()
+# plt.show()
+plt.close()
 
 
 ## Stribeck curve
@@ -150,13 +151,17 @@ plt.plot(Hersey_values, COF_values, 'bo')
 plt.xlabel('Hersey number [-]')
 plt.ylabel('Coefficient of Friction [-]')
 plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
-plt.show()
+# plt.show()
+plt.close()
+
 
 
 ## Interesting points
 vis.Report_Ops(Time,Ops,interesting_timestamps)
 plt.savefig('PostProcessing/Interesting_points.png',dpi=300)
-plt.show()
+# plt.show()
+plt.close()
+
 
 
 
@@ -167,31 +172,39 @@ for time in interesting_timestamps:
     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
     figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
-    plt.show()
+    # plt.show()
+    plt.close()
+
 
 ### Vapour volume fraction, viscosity, Density at relavant locations
 # interesting_timestamps = [100]
 for time in interesting_timestamps:
     plt.plot(Grid.x,StateVector[time].VapourVolumeFraction)
-    plt.ylabel(chr(945) + ' [-]')
+    plt.ylabel(chr(945) + ' [-]'+'at time =' + str(time*5/100) + 'ms')
     plt.xlabel('x [mm]')
     figname="PostProcessing/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
-    plt.show()
+    # plt.show()
+    plt.close()
+
 
     plt.plot(Grid.x,StateVector[time].Density)
-    plt.ylabel('Density [kg/m³]')
+    plt.ylabel('Density [kg/m³]'+'at time =' + str(time*5/100) + 'ms')
     plt.xlabel('x [mm]')
     figname="PostProcessing/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
-    plt.show()
+    # plt.show()
+    plt.close()
+
 
     plt.plot(Grid.x,StateVector[time].Viscosity)
-    plt.ylabel('Viscosity [Pa s]')
+    plt.ylabel('Viscosity [Pa s]'+'at time =' + str(time*5/100) + 'ms')
     plt.xlabel('x [mm]')
     figname="PostProcessing/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
-    plt.show()
+    # plt.show()
+    plt.close()
+
     
 
 
@@ -251,7 +264,9 @@ for time in interesting_timestamps:
     plt.plot(x_grid, StateVector[time].h)
     figname="PostProcessing/Vectorplot@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
-    plt.show()
+    # plt.show()
+    plt.close()
+
             
 
 
@@ -269,7 +284,9 @@ plt.xlabel('Crank angle [rad]')
 # plt.xlabel('time [s]')
 plt.ylabel('Weardepth ring [mm]')
 plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
-plt.show()
+# plt.show()
+plt.close()
+
 
 # for time in interesting_timestamps:
 time = 998 # We are only interested in wear after a full combustion cycle
@@ -277,7 +294,9 @@ plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].
 plt.xlabel('Location on cylinder liner [mm]')
 plt.ylabel('Wear depth [m]')
 plt.savefig('PostProcessing/Wear_cylinder.png',dpi=300)    
-plt.show()
+# plt.show()
+plt.close()
+
 
 
 
