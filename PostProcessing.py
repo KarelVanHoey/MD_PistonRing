@@ -334,4 +334,19 @@ plt.close()
 # print('Maximim wear depth on cylinder sleeve = ' + str(max(StateVector[time].WearDepthCylinder)))
 
 
+# lifetime compression ring
 
+WearDepth_one_comb_cycle = StateVector[999].WearDepthRing # constant wear rate assumed
+reduction = 0.2 * Engine.CompressionRing.CrownHeight
+nr_comb_cycles = reduction / WearDepth_one_comb_cycle
+rot = nr_comb_cycles * 2 #  1 combustion cycle = 2 rotations of crackshaft
+km = rot / 1200 # 120 km/h @ 2400 rpm --> 1 km/30s --> 1km = 1200 rot
+print('aantal km= ', km)
+
+# lifetime cylinder liner
+
+max_one_comb_cycle = np.max(StateVector[999].WearDepthCylinder)
+nr_comb_cycles_2 = 0.000002 / max_one_comb_cycle
+rot2 = nr_comb_cycles_2 * 2
+km2 = rot2 / 1200
+print('aantal km cylinder liner = ', km2)
