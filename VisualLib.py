@@ -18,7 +18,7 @@ def Report_PT(Grid,State,time=None): # initiatlization
     color = 'tab:blue'
     ax1.set_xlabel('$x [m]$')
     if time is not None:
-        ax1.set_ylabel('$P [MPa]$ at time =' + str(time),color=color)
+        ax1.set_ylabel('$P [MPa]$ at time =' + str(time*5/100) + 'ms',color=color)
     else:
         ax1.set_ylabel('$P [MPa]$',color=color)
     ax1.plot(Grid.x,State.Pressure/1e6,'x-', linewidth=1,color=color)
@@ -50,6 +50,8 @@ def Report_Ops(Time,Ops,time):
     ax2.plot(Time.t,Ops.CompressionRingLoad,'-',Time.t[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
     ax2.tick_params(axis='y')
     f2.tight_layout()  # otherwise the right y-label is slightly clipped
+    ax1.vlines(time/100000*5,-15,15,'k','--', linewidth=.6)
+    ax1.set_ylim([-15,15])
     # plt.show()
     return f2
 
