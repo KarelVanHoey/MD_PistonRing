@@ -40,17 +40,21 @@ def Report_Ops(Time,Ops,time):
     
     f2, ax1 = plt.subplots()
     color = 'tab:blue'
-    ax1.set_xlabel('$t [s]$')
+    # ax1.set_xlabel('$t [s]$')
+    ax1.set_xlabel('$Crank angle [rad]$')
     ax1.set_ylabel('$U [m/s]$',color=color)
-    ax1.plot(Time.t,Ops.SlidingVelocity,'-',Time.t[time],Ops.SlidingVelocity[time],'ko', linewidth=1,color=color)
+    # ax1.plot(Time.t,Ops.SlidingVelocity,'-',Time.t[time],Ops.SlidingVelocity[time],'ko', linewidth=1,color=color)
+    ax1.plot(Ops.CranckAngle,Ops.SlidingVelocity,'-',Ops.CranckAngle[time],Ops.SlidingVelocity[time],'ko', linewidth=1,color=color)
+    plt.xlabel('Crank angle $\psi$ [rad]')
     ax1.tick_params(axis='y')
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     color = 'tab:red'
     ax2.set_ylabel('$F [N/m]$',color=color)  # we already handled the x-label with ax1
-    ax2.plot(Time.t,Ops.CompressionRingLoad,'-',Time.t[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
+    # ax2.plot(Time.t,Ops.CompressionRingLoad,'-',Time.t[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
+    ax2.plot(Ops.CranckAngle,Ops.CompressionRingLoad,'-',Ops.CranckAngle[time],Ops.CompressionRingLoad[time],'ko',linewidth=1,color=color)
     ax2.tick_params(axis='y')
     f2.tight_layout()  # otherwise the right y-label is slightly clipped
-    ax1.vlines(time/100000*5,-15,15,'k','--', linewidth=.6)
+    ax1.vlines(Ops.CranckAngle[time],-15,15,'k','--', linewidth=.6)
     ax1.set_ylim([-15,15])
     # plt.show()
     return f2
