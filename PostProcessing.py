@@ -15,6 +15,7 @@ Import libraries
 import numpy as np # Matrix Definitions and operations.
 import scipy.integrate as integral # Sparse Matrix Definitions and operations
 import matplotlib.pyplot as plt
+from matplotlib.patches import Polygon
 
 
 from EngineParts import Engine  #import all classes from file
@@ -117,124 +118,125 @@ for time in range(1,Time.nt): # [100]:#
     
 
 """Post-Processing"""
-P_hydro = np.zeros(Time.nt - 1)
-P_asp = np.zeros(Time.nt - 1)
-for time in range(Time.nt - 1):
-    P_hydro[time] = StateVector[time].HydrodynamicLoad
-    P_asp[time] = StateVector[time].AsperityLoad
-plt.plot(P_hydro)
-plt.plot(P_asp)
-plt.plot(P_hydro+P_asp)
-# plt.show()
-plt.close()
+# ## Hydrodynamic load and asperity load
+# P_hydro = np.zeros(Time.nt - 1)
+# P_asp = np.zeros(Time.nt - 1)
+# for time in range(Time.nt - 1):
+#     P_hydro[time] = StateVector[time].HydrodynamicLoad
+#     P_asp[time] = StateVector[time].AsperityLoad
+# plt.plot(P_hydro)
+# plt.plot(P_asp)
+# plt.plot(P_hydro+P_asp)
+# # plt.show()
+# plt.close()
 
 interesting_timestamps = np.array([1, 94, 500, 563, 999]) #250, 
 
 ## Dimensionless film thickness as function of crank angle
 
 
-Lambda_values = np.zeros(Time.nt - 1)
-Hersey_values = np.zeros(Time.nt - 1)
-COF_values = np.zeros(Time.nt-1)
+# Lambda_values = np.zeros(Time.nt - 1)
+# Hersey_values = np.zeros(Time.nt - 1)
+# COF_values = np.zeros(Time.nt-1)
 
-for time in range(Time.nt - 1):
-    Lambda_values[time] = StateVector[time].Lambda
-    Hersey_values[time] = (abs(np.mean(StateVector[time].Hersey)))
-    COF_values[time] = abs(StateVector[time].COF)
+# for time in range(Time.nt - 1):
+#     Lambda_values[time] = StateVector[time].Lambda
+#     Hersey_values[time] = (abs(np.mean(StateVector[time].Hersey)))
+#     COF_values[time] = abs(StateVector[time].COF)
 
-plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
-plt.xlabel('Crank angle $\psi$ [rad]')
-plt.ylabel('$\Lambda$ [-]')
-plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
-plt.xlim([-.5, 13])
+# plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
+# plt.xlabel('Crank angle $\psi$ [rad]')
+# plt.ylabel('$\Lambda$ [-]')
+# plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
+# plt.xlim([-.5, 13])
+# # plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
+# # plt.show()
+# plt.close()
+
+# ## Multicolor filmthickness
+# gradient = np.linspace(0,1,len(Ops.CranckAngle[1:]))
+# for i in range(len(Lambda_values)):
+#     plt.plot(Ops.CranckAngle[i+1],Lambda_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
+# plt.xlabel('Crank angle $\psi$ [rad]')
+# plt.ylabel('$\Lambda$ [-]')
+# plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
+# plt.xlim([-.5, 13])
 # plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
 # plt.show()
-plt.close()
-
-## Multicolor filmthickness
-gradient = np.linspace(0,1,len(Ops.CranckAngle[1:]))
-for i in range(len(Lambda_values)):
-    plt.plot(Ops.CranckAngle[i+1],Lambda_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
-plt.xlabel('Crank angle $\psi$ [rad]')
-plt.ylabel('$\Lambda$ [-]')
-plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
-plt.xlim([-.5, 13])
-plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
-plt.show()
-plt.close()
+# plt.close()
 
 
-# ## Stribeck curve
+# # ## Stribeck curve
 
 
 
-plt.plot(Hersey_values, COF_values, 'bo')
-plt.xlabel('Hersey number [-]')
-plt.ylabel('Coefficient of Friction [-]')
-plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
+# plt.plot(Hersey_values, COF_values, 'bo')
+# plt.xlabel('Hersey number [-]')
+# plt.ylabel('Coefficient of Friction [-]')
+# plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
+# # plt.show()
+# plt.close()
+
+# ## Multi color Stribeck
+# for i in range(len(COF_values)):
+#     plt.plot(Hersey_values[i]*10**4,COF_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
+# plt.xlabel('Hersey number x$ 10^4$ [-]')
+# plt.ylabel('Coefficient of Friction [-]')
+# # plt.xscale('log')
+# plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
 # plt.show()
-plt.close()
-
-## Multi color Stribeck
-for i in range(len(COF_values)):
-    plt.plot(Hersey_values[i]*10**4,COF_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
-plt.xlabel('Hersey number x$ 10^4$ [-]')
-plt.ylabel('Coefficient of Friction [-]')
-# plt.xscale('log')
-plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
-plt.show()
-plt.close()
+# plt.close()
 
 
 
-## Interesting points
-vis.Report_Ops(Time,Ops,interesting_timestamps)
-plt.savefig('PostProcessing/Interesting_points.png',dpi=300)
-# plt.show()
-plt.close()
+# ## Interesting points
+# vis.Report_Ops(Time,Ops,interesting_timestamps)
+# plt.savefig('PostProcessing/Interesting_points.png',dpi=300)
+# # plt.show()
+# plt.close()
 
 
 
 
-## Characteristic pressure & temperature fields at interesting and relevant locations
+# ## Characteristic pressure & temperature fields at interesting and relevant locations
 
-for time in interesting_timestamps:
+# for time in interesting_timestamps:
     
-    vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
-    figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-    plt.savefig(figname,dpi=300)
-    # plt.show()
-    plt.close()
+#     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
+#     figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     plt.savefig(figname,dpi=300)
+#     # plt.show()
+#     plt.close()
 
 
-### Vapour volume fraction, viscosity, Density at relavant locations
-# interesting_timestamps = [100]
-for time in interesting_timestamps:
-    plt.plot(Grid.x*1000,StateVector[time].VapourVolumeFraction)
-    plt.ylabel(chr(945) + ' [-]'+' at time =' + str(time*5/100) + 'ms')
-    plt.xlabel('x [mm]')
-    figname="PostProcessing/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-    plt.savefig(figname,dpi=300)
-    # plt.show()
-    plt.close()
+# ### Vapour volume fraction, viscosity, Density at relavant locations
+# # interesting_timestamps = [100]
+# for time in interesting_timestamps:
+#     plt.plot(Grid.x*1000,StateVector[time].VapourVolumeFraction)
+#     plt.ylabel(chr(945) + ' [-]'+' at time =' + str(time*5/100) + 'ms')
+#     plt.xlabel('x [mm]')
+#     figname="PostProcessing/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     plt.savefig(figname,dpi=300)
+#     # plt.show()
+#     plt.close()
 
 
-    plt.plot(Grid.x*1000,StateVector[time].Density)
-    plt.ylabel('Density [kg/m³]'+' at time =' + str(time*5/100) + 'ms')
-    plt.xlabel('x [mm]')
-    figname="PostProcessing/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-    plt.savefig(figname,dpi=300)
-    # plt.show()
-    plt.close()
+#     plt.plot(Grid.x*1000,StateVector[time].Density)
+#     plt.ylabel('Density [kg/m³]'+' at time =' + str(time*5/100) + 'ms')
+#     plt.xlabel('x [mm]')
+#     figname="PostProcessing/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     plt.savefig(figname,dpi=300)
+#     # plt.show()
+#     plt.close()
 
 
-    plt.plot(Grid.x*1000,StateVector[time].Viscosity)
-    plt.ylabel('Viscosity [Pa s]'+' at time =' + str(time*5/100) + 'ms')
-    plt.xlabel('x [mm]')
-    figname="PostProcessing/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-    plt.savefig(figname,dpi=300)
-    # plt.show()
-    plt.close()
+#     plt.plot(Grid.x*1000,StateVector[time].Viscosity)
+#     plt.ylabel('Viscosity [Pa s]'+' at time =' + str(time*5/100) + 'ms')
+#     plt.xlabel('x [mm]')
+#     figname="PostProcessing/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     plt.savefig(figname,dpi=300)
+#     # plt.show()
+#     plt.close()
 
     
 
@@ -245,6 +247,8 @@ for time in interesting_timestamps:
 
     ## To be done:  calculate time derivative of h0 for v2 (v1=0)
     ##              implement formulas from slide 17 in Hydrodyn Theory slides
+
+# interesting_timestamps = np.array([1, 500, 999]) #250, 
 
 # interesting_timestamps = [100]
 for time in interesting_timestamps:
@@ -265,16 +269,21 @@ for time in interesting_timestamps:
     u_z = np.zeros((z_n, Nx))
 
     z_grid = np.linspace(0.0, h[0], z_n)
-    
     for x in range(Grid.Nx):
         u_x[:, x] = np.array([1/visc_x[x] * p_x[x] * 1/2 * (z**2 - h[x] * z) if z < h[x] else 0 for z in z_grid])  # Poiseuille
         u_x[:, x] += np.array([(u2 - u1) / h[x] * z + u1 if z < h[x] else 0 for z in z_grid])                      # Couette
         # Note: list comprehension is used to get zero for points "inside" of the ring in the vector plot
-
+        # print(u_x[:,x])
+        # print(np.array([1/visc_x[x] * p_x[x] * 1/2 * (z**2 - h[x] * z) if z < h[x] else 0 for z in z_grid]))
         # u_z[:, x] = np.trapz(1/density[x] * DDX @ (density[x] * u_x[:, x]),z_grid)*10000
-
+    
+    # np.average(u_x)
     ## Reduce amount of datapoint used to generate vectors. Note: plt.quiver wants the same amount of elements in X and Y!
     skip = 10
+    scale = 1
+    if time in np.array([1, 500, 999]):
+        skip = 12
+        scale = 40
     skip1 = (slice(None, None, skip))
     skip2 = (slice(None, None, skip), slice(None, None, skip))
 
@@ -286,67 +295,77 @@ for time in interesting_timestamps:
 
 
     ## Make vector plot
-    plt.quiver(X,Z,u_x[skip2],u_z[skip2],minlength=0,scale=350)
+    pts = [[-0.75,0.02]]
+    for i in range(len(x_grid)):
+        pts.append([x_grid[i]*1000,StateVector[time].h[i]*1000])
+    pts.append([0.75,0.02])
+    p = Polygon(pts,closed=False,ec='black',fc='grey',zorder=.1)
+    plt.gca().add_patch(p)
+
+    plt.quiver(X*1000,Z*1000,u_x[skip2]*scale,u_z[skip2],pivot='tail',minlength=0,scale=350) #scale=350 for v!=0
 
     ### (Un)comment following two line to ensure that no vector crosses the ring.
     # plt.quiver(X_l,Z_l,(u_x[:,:Nx//2])[skip2],(u_z[:,:Nx//2])[skip2],minlength=0,pivot='tip',scale=350)
     # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
 
-    plt.plot(x_grid*1000, StateVector[time].h*1000)
+    # plt.plot(x_grid*1000, StateVector[time].h*1000)
     figname="PostProcessing/Vectorplot@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.xlabel('x [mm]')
     plt.ylabel('z [mm]')
     plt.title('Vectorplot for t =' + str(time*5/100) + 'ms')
+    plt.xlim([-.8,.8])
+    plt.ylim([0.0, 0.0175])
+    plt.tight_layout()
     plt.savefig(figname,dpi=300)
-    # plt.show()
+    plt.show()
     plt.close()
 
             
 
 
-## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
+# ## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
 
-WearDepthRing_values = np.zeros(Time.nt - 1)
-WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
+# WearDepthRing_values = np.zeros(Time.nt - 1)
+# WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
 
-for time in range(Time.nt - 1):
-    WearDepthRing_values[time] = StateVector[time].WearDepthRing
+# for time in range(Time.nt - 1):
+#     WearDepthRing_values[time] = StateVector[time].WearDepthRing
 
-plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'bo')
-plt.xlabel('Crank angle [rad]')
-# plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
-# plt.xlabel('time [s]')
-plt.ylabel('Weardepth ring [mm]')
-plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
-# plt.show()
-plt.close()
-
-
-# for time in interesting_timestamps:
-time = 998 # We are only interested in wear after a full combustion cycle
-plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'bo')
-plt.xlabel('Location on cylinder liner [mm]')
-plt.ylabel('Wear depth [m]')
-plt.savefig('PostProcessing/Wear_cylinder.png',dpi=300)    
-# plt.show()
-plt.close()
-
-print('Maximim wear depth on cylinder sleeve = ' + str(max(StateVector[time].WearDepthCylinder)))
+# plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'bo')
+# plt.xlabel('Crank angle [rad]')
+# # plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
+# # plt.xlabel('time [s]')
+# plt.ylabel('Weardepth ring [mm]')
+# plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
+# # plt.show()
+# plt.close()
 
 
-# lifetime compression ring
+# # for time in interesting_timestamps:
+# time = 999 # We are only interested in wear after a full combustion cycle
+# plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'bo')
+# plt.xlabel('Location on cylinder liner [mm]')
+# plt.ylabel('Wear depth [m]')
+# plt.savefig('PostProcessing/Wear_cylinder.png',dpi=300)    
+# # plt.show()
+# plt.close()
 
-WearDepth_one_comb_cycle = StateVector[999].WearDepthRing # constant wear rate assumed
-reduction = 0.2 * Engine.CompressionRing.CrownHeight
-nr_comb_cycles = reduction / WearDepth_one_comb_cycle
-rot = nr_comb_cycles * 2 #  1 combustion cycle = 2 rotations of crackshaft
-km = rot / 1200 # 120 km/h @ 2400 rpm --> 1 km/30s --> 1km = 1200 rot
-print('aantal km= ', km)
+# print('Maximim wear depth on cylinder sleeve = ' + str(max(StateVector[time].WearDepthCylinder)))
 
-# lifetime cylinder liner
 
-max_one_comb_cycle = np.max(StateVector[999].WearDepthCylinder)
-nr_comb_cycles_2 = 0.000002 / max_one_comb_cycle
-rot2 = nr_comb_cycles_2 * 2
-km2 = rot2 / 1200
-print('aantal km cylinder liner = ', km2)
+# # lifetime compression ring
+
+# WearDepth_one_comb_cycle = StateVector[999].WearDepthRing # constant wear rate assumed
+# reduction = 0.2 * Engine.CompressionRing.CrownHeight
+# nr_comb_cycles = reduction / WearDepth_one_comb_cycle
+# rot = nr_comb_cycles * 2 #  1 combustion cycle = 2 rotations of crackshaft
+# km = rot / 1200 # 120 km/h @ 2400 rpm --> 1 km/30s --> 1km = 1200 rot
+# print('aantal km= ', km)
+
+# # lifetime cylinder liner
+
+# max_one_comb_cycle = np.max(StateVector[999].WearDepthCylinder)
+# nr_comb_cycles_2 = 0.000002 / max_one_comb_cycle
+# rot2 = nr_comb_cycles_2 * 2
+# km2 = rot2 / 1200
+# print('aantal km cylinder liner = ', km2)

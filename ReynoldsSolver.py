@@ -174,6 +174,7 @@ class ReynoldsSolver:
             # delta_T = T_star - StateVector[time].Temperature
             delta_T = np.maximum(T_star,self.Ops.OilTemperature) - StateVector[time].Temperature
             StateVector[time].Temperature += delta_T * self.UnderRelaxT
+            StateVector[time].Temperature = np.minimum(StateVector[time].Temperature, 260+273.15)
             # if np.max(StateVector[time].Temperature) > 1e10:
             #     StateVector[time].Temperature = np.ones(len(StateVector[time].Temperature)) * self.Ops.OilTemperature
             
@@ -233,4 +234,16 @@ class ReynoldsSolver:
         WallShearStress_h = Viscosity * self.Ops.SlidingVelocity[time] / StateVector[time].h  + (DDX @ StateVector[time].Pressure) * StateVector[time].h /2
         StateVector[time].WallShearStress = WallShearStress_h
         StateVector[time].ViscousFriction = np.trapz(StateVector[time].WallShearStress, dx=self.Grid.dx)
+
+        # fig, ax1 = plt.subplots()
+
+        # ax2 = ax1.twinx()
+        # ax1.plot( pmax, 'g-')
+        # ax2.plot(Tmax, 'b-')
+
+        # ax1.set_xlabel('p data')
+        # ax1.set_ylabel('p data', color='g')
+        # ax2.set_ylabel('T data', color='b')
+
+        # plt.show()
 

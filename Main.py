@@ -112,7 +112,7 @@ Delta_Load = 0.0
 """Start from Initial guess or Load Initial State"""
 
 time=(np.abs(Time.t - InitTime)).argmin()
-
+print(Time.t)
 if LoadInitialState:
     
     """Start from previous solution: Load Data at t=0"""
@@ -228,7 +228,7 @@ while time<Time.nt:
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
-            figname="Figures/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+            figname="Figures_v2/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
@@ -245,7 +245,7 @@ while time<Time.nt:
     
     """Save Output""" 
     if SaveStates:
-        FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_v2/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 

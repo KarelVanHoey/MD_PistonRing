@@ -167,8 +167,8 @@ h_transl = h_template - 0.25 * Engine.CompressionRing.CrownHeight
 h_capped = np.maximum(h_transl, 0)
 
 # print(Ops.SlidingVelocity[time])
-vis.Report_Ops(Time,Ops,time)
-plt.show()
+# vis.Report_Ops(Time,Ops,time)
+# plt.show()
 # print(Ops.PistonPosition)
 """Start Time Loop"""
 start_time = TimeKeeper.time()
@@ -235,8 +235,8 @@ while time<Time.nt:
         StateVector[time].h0 = h0_k[k_load]
         StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
     
-    plt.plot(Delta_Load)
-    plt.show()
+    # plt.plot(Delta_Load)
+    # plt.show()
     
     """Visual Output per time step""" 
     if VisualFeedbackLevel>0:
@@ -245,7 +245,7 @@ while time<Time.nt:
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
-            figname="Test_fig/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
+            figname="Figures_worn/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png"  
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
@@ -262,7 +262,7 @@ while time<Time.nt:
     
     """Save Output""" 
     if SaveStates:
-        FileName='Test_fig/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_worn/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 
