@@ -81,7 +81,7 @@ Discretization=FiniteDifferences(Grid)
 """Read Data"""
 time=0
 for time in range(1,Time.nt): # [100]:# 
-    FileName='Data/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName='Data_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     StateVector[time].h0=float(Data['State']['h0']) # ok
@@ -196,142 +196,142 @@ plt.close()
 
 
 
-# ## Characteristic pressure & temperature fields at interesting and relevant locations
+## Characteristic pressure & temperature fields at interesting and relevant locations
 
-# for time in interesting_timestamps:
+for time in interesting_timestamps:
     
-#     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
-#     figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-#     plt.savefig(figname,dpi=300)
-#     # plt.show()
-#     plt.close()
+    vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
+    figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    plt.savefig(figname,dpi=300)
+    # plt.show()
+    plt.close()
 
 
-# ### Vapour volume fraction, viscosity, Density at relavant locations
-# # interesting_timestamps = [100]
-# for time in interesting_timestamps:
-#     plt.plot(Grid.x*1000,StateVector[time].VapourVolumeFraction)
-#     plt.ylabel(chr(945) + ' [-]'+' at time =' + str(time*5/100) + 'ms')
-#     plt.xlabel('x [mm]')
-#     figname="PostProcessing/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-#     plt.savefig(figname,dpi=300)
-#     # plt.show()
-#     plt.close()
+### Vapour volume fraction, viscosity, Density at relavant locations
+# interesting_timestamps = [100]
+for time in interesting_timestamps:
+    plt.plot(Grid.x*1000,StateVector[time].VapourVolumeFraction)
+    plt.ylabel(chr(945) + ' [-]'+' at time =' + str(time*5/100) + 'ms')
+    plt.xlabel('x [mm]')
+    figname="PostProcessing/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    plt.savefig(figname,dpi=300)
+    # plt.show()
+    plt.close()
 
 
-#     plt.plot(Grid.x*1000,StateVector[time].Density)
-#     plt.ylabel('Density [kg/m³]'+' at time =' + str(time*5/100) + 'ms')
-#     plt.xlabel('x [mm]')
-#     figname="PostProcessing/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-#     plt.savefig(figname,dpi=300)
-#     # plt.show()
-#     plt.close()
+    plt.plot(Grid.x*1000,StateVector[time].Density)
+    plt.ylabel('Density [kg/m³]'+' at time =' + str(time*5/100) + 'ms')
+    plt.xlabel('x [mm]')
+    figname="PostProcessing/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    plt.savefig(figname,dpi=300)
+    # plt.show()
+    plt.close()
 
 
-#     plt.plot(Grid.x*1000,StateVector[time].Viscosity)
-#     plt.ylabel('Viscosity [Pa s]'+' at time =' + str(time*5/100) + 'ms')
-#     plt.xlabel('x [mm]')
-#     figname="PostProcessing/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-#     plt.savefig(figname,dpi=300)
-#     # plt.show()
-#     plt.close()
+    plt.plot(Grid.x*1000,StateVector[time].Viscosity)
+    plt.ylabel('Viscosity [Pa s]'+' at time =' + str(time*5/100) + 'ms')
+    plt.xlabel('x [mm]')
+    figname="PostProcessing/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    plt.savefig(figname,dpi=300)
+    # plt.show()
+    plt.close()
 
     
 
 
 
 
-# ## 2D vectorplot of flow velocity at relevant locations
+## 2D vectorplot of flow velocity at relevant locations
 
-#     ## To be done:  calculate time derivative of h0 for v2 (v1=0)
-#     ##              implement formulas from slide 17 in Hydrodyn Theory slides
+    ## To be done:  calculate time derivative of h0 for v2 (v1=0)
+    ##              implement formulas from slide 17 in Hydrodyn Theory slides
 
-# # interesting_timestamps = [100]
-# for time in interesting_timestamps:
-#     visc_x = StateVector[time].Viscosity
-#     density = Mixture.Density(StateVector[time])
-#     p = StateVector[time].Pressure
-#     p_x = Discretization.DDXCentral @ p
-#     DDX = Discretization.DDXCentral
-#     p_y = 0.0
-#     x_grid = Grid.x
-#     z_n = Grid.Nx
-#     h = StateVector[time].h
+# interesting_timestamps = [100]
+for time in interesting_timestamps:
+    visc_x = StateVector[time].Viscosity
+    density = Mixture.Density(StateVector[time])
+    p = StateVector[time].Pressure
+    p_x = Discretization.DDXCentral @ p
+    DDX = Discretization.DDXCentral
+    p_y = 0.0
+    x_grid = Grid.x
+    z_n = Grid.Nx
+    h = StateVector[time].h
     
-#     u1 = 0
-#     u2 = Ops.SlidingVelocity[time] # or PistonVelocity ? idk
-#     Nx = Grid.Nx
-#     u_x = np.zeros((z_n, Nx))
-#     u_z = np.zeros((z_n, Nx))
+    u1 = 0
+    u2 = Ops.SlidingVelocity[time] # or PistonVelocity ? idk
+    Nx = Grid.Nx
+    u_x = np.zeros((z_n, Nx))
+    u_z = np.zeros((z_n, Nx))
 
-#     z_grid = np.linspace(0.0, h[0], z_n)
+    z_grid = np.linspace(0.0, h[0], z_n)
     
-#     for x in range(Grid.Nx):
-#         u_x[:, x] = np.array([1/visc_x[x] * p_x[x] * 1/2 * (z**2 - h[x] * z) if z < h[x] else 0 for z in z_grid])  # Poiseuille
-#         u_x[:, x] += np.array([(u2 - u1) / h[x] * z + u1 if z < h[x] else 0 for z in z_grid])                      # Couette
-#         # Note: list comprehension is used to get zero for points "inside" of the ring in the vector plot
+    for x in range(Grid.Nx):
+        u_x[:, x] = np.array([1/visc_x[x] * p_x[x] * 1/2 * (z**2 - h[x] * z) if z < h[x] else 0 for z in z_grid])  # Poiseuille
+        u_x[:, x] += np.array([(u2 - u1) / h[x] * z + u1 if z < h[x] else 0 for z in z_grid])                      # Couette
+        # Note: list comprehension is used to get zero for points "inside" of the ring in the vector plot
 
-#         # u_z[:, x] = np.trapz(1/density[x] * DDX @ (density[x] * u_x[:, x]),z_grid)*10000
+        # u_z[:, x] = np.trapz(1/density[x] * DDX @ (density[x] * u_x[:, x]),z_grid)*10000
 
-#     ## Reduce amount of datapoint used to generate vectors. Note: plt.quiver wants the same amount of elements in X and Y!
-#     skip = 10
-#     skip1 = (slice(None, None, skip))
-#     skip2 = (slice(None, None, skip), slice(None, None, skip))
+    ## Reduce amount of datapoint used to generate vectors. Note: plt.quiver wants the same amount of elements in X and Y!
+    skip = 10
+    skip1 = (slice(None, None, skip))
+    skip2 = (slice(None, None, skip), slice(None, None, skip))
 
-#     ## Make grid for vectors
-#     X, Z = np.meshgrid(x_grid[skip1], z_grid[skip1])
+    ## Make grid for vectors
+    X, Z = np.meshgrid(x_grid[skip1], z_grid[skip1])
 
-#     X_l, Z_l = np.meshgrid((x_grid[:Nx//2])[skip1], (z_grid)[skip1])
-#     X_r, Z_r = np.meshgrid((x_grid[Nx//2+1:])[skip1], (z_grid)[skip1])
+    X_l, Z_l = np.meshgrid((x_grid[:Nx//2])[skip1], (z_grid)[skip1])
+    X_r, Z_r = np.meshgrid((x_grid[Nx//2+1:])[skip1], (z_grid)[skip1])
 
 
-#     ## Make vector plot
-#     plt.quiver(X,Z,u_x[skip2],u_z[skip2],minlength=0,scale=350)
+    ## Make vector plot
+    plt.quiver(X,Z,u_x[skip2],u_z[skip2],minlength=0,scale=350)
 
-#     ### (Un)comment following two line to ensure that no vector crosses the ring.
-#     # plt.quiver(X_l,Z_l,(u_x[:,:Nx//2])[skip2],(u_z[:,:Nx//2])[skip2],minlength=0,pivot='tip',scale=350)
-#     # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
+    ### (Un)comment following two line to ensure that no vector crosses the ring.
+    # plt.quiver(X_l,Z_l,(u_x[:,:Nx//2])[skip2],(u_z[:,:Nx//2])[skip2],minlength=0,pivot='tip',scale=350)
+    # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
 
-#     plt.plot(x_grid*1000, StateVector[time].h*1000)
-#     figname="PostProcessing/Vectorplot@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-#     plt.xlabel('x [mm]')
-#     plt.ylabel('z [mm]')
-#     plt.title('Vectorplot for t =' + str(time*5/100) + 'ms')
-#     plt.savefig(figname,dpi=300)
-#     # plt.show()
-#     plt.close()
+    plt.plot(x_grid*1000, StateVector[time].h*1000)
+    figname="PostProcessing/Vectorplot@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    plt.xlabel('x [mm]')
+    plt.ylabel('z [mm]')
+    plt.title('Vectorplot for t =' + str(time*5/100) + 'ms')
+    plt.savefig(figname,dpi=300)
+    # plt.show()
+    plt.close()
 
             
 
 
-# ## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
+## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
 
-# WearDepthRing_values = np.zeros(Time.nt - 1)
-# WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
+WearDepthRing_values = np.zeros(Time.nt - 1)
+WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
 
-# for time in range(Time.nt - 1):
-#     WearDepthRing_values[time] = StateVector[time].WearDepthRing
+for time in range(Time.nt - 1):
+    WearDepthRing_values[time] = StateVector[time].WearDepthRing
 
-# plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'bo')
-# plt.xlabel('Crank angle [rad]')
-# # plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
-# # plt.xlabel('time [s]')
-# plt.ylabel('Weardepth ring [mm]')
-# plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
-# # plt.show()
-# plt.close()
+plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'bo')
+plt.xlabel('Crank angle [rad]')
+# plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
+# plt.xlabel('time [s]')
+plt.ylabel('Weardepth ring [mm]')
+plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
+# plt.show()
+plt.close()
 
 
-# # for time in interesting_timestamps:
-# time = 998 # We are only interested in wear after a full combustion cycle
-# plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'bo')
-# plt.xlabel('Location on cylinder liner [mm]')
-# plt.ylabel('Wear depth [m]')
-# plt.savefig('PostProcessing/Wear_cylinder.png',dpi=300)    
-# # plt.show()
-# plt.close()
+# for time in interesting_timestamps:
+time = 998 # We are only interested in wear after a full combustion cycle
+plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'bo')
+plt.xlabel('Location on cylinder liner [mm]')
+plt.ylabel('Wear depth [m]')
+plt.savefig('PostProcessing/Wear_cylinder.png',dpi=300)    
+# plt.show()
+plt.close()
 
-# print('Maximim wear depth on cylinder sleeve = ' + str(max(StateVector[time].WearDepthCylinder)))
+print('Maximim wear depth on cylinder sleeve = ' + str(max(StateVector[time].WearDepthCylinder)))
 
 
 
