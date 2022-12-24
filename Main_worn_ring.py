@@ -42,10 +42,10 @@ import VisualLib as vis
 
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=True # Save figures to file? True/False
+SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
-SaveStates=True # Save States to File? True/False
+SaveStates=False # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -203,6 +203,7 @@ while time<Time.nt:
         """a. Calculate Film Thickness Profile"""
         StateVector[time].h = h_capped + h0_k[k_load]
         
+        
         """b. Calculate Asperity Load"""
         StateVector[time].Lambda = h0_k[k_load] / Contact.Roughness     # lambda hier gwn berekenen en min naar asperity contact verplaatsen
         Contact.AsperityContact(StateVector,time)
@@ -235,6 +236,8 @@ while time<Time.nt:
         StateVector[time].h0 = h0_k[k_load]
         # StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
     
+    plt.plot(StateVector[time].h)
+    plt.show()
     # plt.plot(Delta_Load)
     # plt.show()
     
