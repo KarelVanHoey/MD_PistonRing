@@ -233,7 +233,7 @@ while time<Time.nt:
            plt.close(fig)
 
         StateVector[time].h0 = h0_k[k_load]
-        StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
+        # StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
     
     # plt.plot(Delta_Load)
     # plt.show()
