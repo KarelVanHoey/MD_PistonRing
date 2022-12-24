@@ -12,7 +12,6 @@ import scipy.sparse as sparse # Sparse Matrix Definitions and operations
 import scipy.sparse.linalg as linalg # Sparse Matrix Linear Algebra
 import matplotlib.pyplot as plt
 import VisualLib as vis
-import cv2
 
 class ReynoldsSolver:
     def __init__(self,Grid,Time,Ops,FluidModel,Discretization):

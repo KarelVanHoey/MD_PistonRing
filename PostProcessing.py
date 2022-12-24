@@ -135,35 +135,39 @@ interesting_timestamps = np.array([1, 94, 500, 563, 999]) #250,
 ## Dimensionless film thickness as function of crank angle
 
 
-# Lambda_values = np.zeros(Time.nt - 1)
-# Hersey_values = np.zeros(Time.nt - 1)
-# COF_values = np.zeros(Time.nt-1)
+Lambda_values = np.zeros(Time.nt - 1)
+Hersey_values = np.zeros(Time.nt - 1)
+COF_values = np.zeros(Time.nt-1)
 
-# for time in range(Time.nt - 1):
-#     Lambda_values[time] = StateVector[time].Lambda
-#     Hersey_values[time] = (abs(np.mean(StateVector[time].Hersey)))
-#     COF_values[time] = abs(StateVector[time].COF)
+for time in range(Time.nt - 1):
+    Lambda_values[time] = StateVector[time].Lambda
+    Hersey_values[time] = (abs(np.mean(StateVector[time].Hersey)))
+    COF_values[time] = abs(StateVector[time].COF)
 
 # plt.plot(Ops.CranckAngle[1:], Lambda_values, 'bo')
 # plt.xlabel('Crank angle $\psi$ [rad]')
 # plt.ylabel('$\Lambda$ [-]')
 # plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
 # plt.xlim([-.5, 13])
-# # plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
-# # plt.show()
-# plt.close()
-
-# ## Multicolor filmthickness
-# gradient = np.linspace(0,1,len(Ops.CranckAngle[1:]))
-# for i in range(len(Lambda_values)):
-#     plt.plot(Ops.CranckAngle[i+1],Lambda_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
-# plt.xlabel('Crank angle $\psi$ [rad]')
-# plt.ylabel('$\Lambda$ [-]')
-# plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
-# plt.xlim([-.5, 13])
+# plt.vlines(Ops.CranckAngle[time],0,37,'k','--', linewidth=.6)
+# plt.ylim([0,37])
 # plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
 # plt.show()
 # plt.close()
+
+## Multicolor filmthickness
+gradient = np.linspace(0,1,len(Ops.CranckAngle[1:]))
+for i in range(len(Lambda_values)):
+    plt.plot(Ops.CranckAngle[i+1],Lambda_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
+plt.xlabel('Crank angle $\psi$ [rad]')
+plt.ylabel('$\Lambda$ [-]')
+plt.hlines([1, 2.5],-2,15,'k','--', linewidth=.6)
+plt.xlim([-.5, 13])
+plt.vlines(Ops.CranckAngle[interesting_timestamps],-3,37,'k','--', linewidth=.6)
+plt.ylim([-1,37])
+plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
+plt.show()
+plt.close()
 
 
 # # ## Stribeck curve
@@ -200,13 +204,13 @@ interesting_timestamps = np.array([1, 94, 500, 563, 999]) #250,
 
 # ## Characteristic pressure & temperature fields at interesting and relevant locations
 
-# for time in interesting_timestamps:
+for time in interesting_timestamps:
     
-#     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
-#     figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
-#     plt.savefig(figname,dpi=300)
-#     # plt.show()
-#     plt.close()
+    vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
+    figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    plt.savefig(figname,dpi=300)
+    plt.show()
+    plt.close()
 
 
 # ### Vapour volume fraction, viscosity, Density at relavant locations
@@ -316,8 +320,8 @@ for time in interesting_timestamps:
     plt.xlim([-.8,.8])
     plt.ylim([0.0, 0.0175])
     plt.tight_layout()
-    plt.savefig(figname,dpi=300)
-    plt.show()
+    # plt.savefig(figname,dpi=300)
+    # plt.show()
     plt.close()
 
             

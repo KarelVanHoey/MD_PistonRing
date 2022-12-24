@@ -43,9 +43,9 @@ import VisualLib as vis
 """General Settings for Input and Output """
 VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=True # Save figures to file? True/False
-LoadInitialState=True # Load The InitialState? True/False
-InitTime=0.02685 #Initial Time to Load?
-SaveStates=False # Save States to File? True/False
+LoadInitialState=False # Load The InitialState? True/False
+InitTime=0.0 #Initial Time to Load?
+SaveStates=True # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
