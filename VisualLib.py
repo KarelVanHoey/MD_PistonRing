@@ -28,7 +28,7 @@ def Report_PT(Grid,State,time=None): # initiatlization
     ax2.set_ylabel('$T [^\circ C]$',color=color)  # we already handled the x-label with ax1
     ax2.plot(Grid.x,State.Temperature-273.15,'x-', linewidth=1,color=color)
     ax2.tick_params(axis='y')
-    f1.tight_layout()  # otherwise the right y-label is slightly clipped
+    # f1.tight_layout()  # otherwise the right y-label is slightly clipped
     # plt.show()
     return f1
     

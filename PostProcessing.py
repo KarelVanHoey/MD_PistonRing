@@ -331,22 +331,25 @@ plt.close()
             
 
 
-# ## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
+## Wear of Compression Ring and Wear at Cylinder liner after one combustion cycle
 
-# WearDepthRing_values = np.zeros(Time.nt - 1)
-# WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
+WearDepthRing_values = np.zeros(Time.nt - 1)
+WearDepthCylinder_values = np.zeros(len(interesting_timestamps))
 
-# for time in range(Time.nt - 1):
-#     WearDepthRing_values[time] = StateVector[time].WearDepthRing
+for time in range(Time.nt - 1):
+    WearDepthRing_values[time] = StateVector[time].WearDepthRing
 
-# plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'bo')
-# plt.xlabel('Crank angle [rad]')
-# # plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
-# # plt.xlabel('time [s]')
-# plt.ylabel('Weardepth ring [mm]')
-# plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
-# # plt.show()
-# plt.close()
+plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'bo')
+plt.xlabel('Crank angle [rad]')
+# plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
+# plt.xlabel('time [s]')
+plt.ylabel('Weardepth ring [mm]')
+pi = np.pi
+# psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
+# plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
+plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
+# plt.show()
+plt.close()
 
 
 # for time in interesting_timestamps:
