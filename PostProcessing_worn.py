@@ -82,7 +82,7 @@ Discretization=FiniteDifferences(Grid)
 """Read Data"""
 time=0
 for time in range(1,Time.nt): # [100]:# 
-    FileName='Data_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName='Data_worn_v4/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     StateVector[time].h0=float(Data['State']['h0']) # ok
@@ -168,7 +168,7 @@ plt.ylim([-1,37])
 pi = np.pi
 psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
 plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
-plt.savefig('PostProcessing/Film_thickness.png',dpi=300)
+plt.savefig('PostProcessing_worn/Film_thickness.png',dpi=300)
 plt.show()
 plt.close()
 
@@ -180,7 +180,7 @@ plt.close()
 # plt.plot(Hersey_values, COF_values, 'bo')
 # plt.xlabel('Hersey number [-]')
 # plt.ylabel('Coefficient of Friction [-]')
-# plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
+# plt.savefig('PostProcessing_worn/Stribeck_curve.png',dpi=300)
 # # plt.show()
 # plt.close()
 
@@ -190,7 +190,7 @@ plt.close()
 # plt.xlabel('Hersey number x$ 10^4$ [-]')
 # plt.ylabel('Coefficient of Friction [-]')
 # # plt.xscale('log')
-# plt.savefig('PostProcessing/Stribeck_curve.png',dpi=300)
+# plt.savefig('PostProcessing_worn/Stribeck_curve.png',dpi=300)
 # plt.show()
 # plt.close()
 
@@ -198,7 +198,7 @@ plt.close()
 
 # ## Interesting points
 # vis.Report_Ops(Time,Ops,interesting_timestamps)
-# plt.savefig('PostProcessing/Interesting_points.png',dpi=300)
+# plt.savefig('PostProcessing_worn/Interesting_points.png',dpi=300)
 # plt.show()
 # plt.close()
 
@@ -210,7 +210,7 @@ plt.close()
 # for time in interesting_timestamps:
     
 #     vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
-#     figname="PostProcessing/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     figname="PostProcessing_worn/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
 #     plt.savefig(figname,dpi=300)
 #     plt.show()
 #     plt.close()
@@ -222,7 +222,7 @@ plt.close()
 #     plt.plot(Grid.x*1000,StateVector[time].VapourVolumeFraction)
 #     plt.ylabel(chr(945) + ' [-]'+' at time =' + str(time*5/100) + 'ms')
 #     plt.xlabel('x [mm]')
-#     figname="PostProcessing/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     figname="PostProcessing_worn/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
 #     plt.savefig(figname,dpi=300)
 #     # plt.show()
 #     plt.close()
@@ -231,7 +231,7 @@ plt.close()
 #     plt.plot(Grid.x*1000,StateVector[time].Density)
 #     plt.ylabel('Density [kg/m³]'+' at time =' + str(time*5/100) + 'ms')
 #     plt.xlabel('x [mm]')
-#     figname="PostProcessing/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     figname="PostProcessing_worn/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
 #     plt.savefig(figname,dpi=300)
 #     # plt.show()
 #     plt.close()
@@ -240,7 +240,7 @@ plt.close()
 #     plt.plot(Grid.x*1000,StateVector[time].Viscosity)
 #     plt.ylabel('Viscosity [Pa s]'+' at time =' + str(time*5/100) + 'ms')
 #     plt.xlabel('x [mm]')
-#     figname="PostProcessing/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     figname="PostProcessing_worn/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
 #     plt.savefig(figname,dpi=300)
 #     # plt.show()
 #     plt.close()
@@ -315,7 +315,7 @@ plt.close()
 #     # plt.quiver(X_r,Z_r,(u_x[:,Nx//2+1:])[skip2],(u_z[:,Nx//2+1:])[skip2],minlength=0,pivot='tail',scale=350)
 
 #     # plt.plot(x_grid*1000, StateVector[time].h*1000)
-#     figname="PostProcessing/Vectorplot@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+#     figname="PostProcessing_worn/Vectorplot@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
 #     plt.xlabel('x [mm]')
 #     plt.ylabel('z [mm]')
 #     plt.title('Vectorplot for t =' + str(time*5/100) + 'ms')
@@ -342,7 +342,7 @@ plt.close()
 # # plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
 # # plt.xlabel('time [s]')
 # plt.ylabel('Weardepth ring [mm]')
-# plt.savefig('PostProcessing/WearDepth_ring.png',dpi=300)
+# plt.savefig('PostProcessing_worn/WearDepth_ring.png',dpi=300)
 # # plt.show()
 # plt.close()
 
@@ -352,7 +352,7 @@ time = 999 # We are only interested in wear after a full combustion cycle
 plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'bo')
 plt.xlabel('Location on cylinder liner [mm]')
 plt.ylabel('Wear depth [m]')
-plt.savefig('PostProcessing/Wear_cylinder.png',dpi=300)    
+plt.savefig('PostProcessing_worn/Wear_cylinder.png',dpi=300)    
 # plt.show()
 plt.close()
 

@@ -55,6 +55,10 @@ def Report_Ops(Time,Ops,time):
     ax2.tick_params(axis='y')
     f2.tight_layout()  # otherwise the right y-label is slightly clipped
     ax1.vlines(Ops.CranckAngle[time],-15,15,'k','--', linewidth=.6)
+    pi = np.pi
+    psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
+    plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
+    # ax2.set_xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
     ax1.set_ylim([-15,15])
     # plt.show()
     return f2
