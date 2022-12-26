@@ -76,9 +76,9 @@ class ReynoldsSolver:
         SetNeumannRight=self.Discretization.SetNeumannRight
         
         
-        ### Test
-        pmax = []
-        Tmax = []
+        # ### Test
+        # pmax = []
+        # Tmax = []
         #3. Iterate
 
         k=0
@@ -173,7 +173,7 @@ class ReynoldsSolver:
             # delta_T = T_star - StateVector[time].Temperature
             delta_T = np.maximum(T_star,self.Ops.OilTemperature) - StateVector[time].Temperature
             StateVector[time].Temperature += delta_T * self.UnderRelaxT
-            StateVector[time].Temperature = np.minimum(StateVector[time].Temperature, 260+273.15)
+            # StateVector[time].Temperature = np.minimum(StateVector[time].Temperature, 260+273.15)
             # if np.max(StateVector[time].Temperature) > 1e10:
             #     StateVector[time].Temperature = np.ones(len(StateVector[time].Temperature)) * self.Ops.OilTemperature
             
@@ -192,20 +192,20 @@ class ReynoldsSolver:
             # if max(StateVector[time].Temperature) > 300 + 273.15:
             #     print('Pmax= ' + str(max(StateVector[time].Pressure)/10**6))
             #     print('Tmax= ' + str(max(StateVector[time].Temperature)))
-            pmax.append(max(StateVector[time].Pressure)/10**6)
-            Tmax.append(max(StateVector[time].Temperature))
-            if max(StateVector[time].Temperature) > 1000:
-                fig, ax1 = plt.subplots()
+            # pmax.append(max(StateVector[time].Pressure)/10**6)
+            # Tmax.append(max(StateVector[time].Temperature))
+            # if max(StateVector[time].Temperature) > 1000:
+            #     fig, ax1 = plt.subplots()
 
-                ax2 = ax1.twinx()
-                ax1.plot( pmax, 'g-')
-                ax2.plot(Tmax, 'b-')
+            #     ax2 = ax1.twinx()
+            #     ax1.plot( pmax, 'g-')
+            #     ax2.plot(Tmax, 'b-')
 
-                ax1.set_xlabel('p data')
-                ax1.set_ylabel('p data', color='g')
-                ax2.set_ylabel('T data', color='b')
+            #     ax1.set_xlabel('p data')
+            #     ax1.set_ylabel('p data', color='g')
+            #     ax2.set_ylabel('T data', color='b')
 
-                plt.show()
+            #     plt.show()
             #10. Provide a plot of the solution
             if (k % 500 == 0):
                 CFL=np.max(av_u)*self.Time.dt/self.Grid.dx

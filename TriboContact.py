@@ -39,7 +39,10 @@ class TriboContact:
         
         """Wear Coefficients"""
         self.WearCoefficient_Cylinder=2.5e-10
-        self.WearCoefficient_CompressionRing=1.25e-10
+        self.WearCoefficient_Cylinder=29e3 * 0.0214e-6 / 1000 # COATING
+        # self.WearCoefficient_CompressionRing=1.25e-10
+        self.WearCoefficient_CompressionRing = 29e3 * 0.0214e-6 / 1000 # COATING
+        
 
     def I2(self,l): 
         I2 = (0.5*(l**2+1)*special.erfc(l/np.sqrt(2.0)) - (l/np.sqrt(2.0*np.pi))*np.exp(-l**2.0/2.0))/np.sqrt(l)

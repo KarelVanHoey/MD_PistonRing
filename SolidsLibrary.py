@@ -10,11 +10,13 @@ class Solids:
     
     def __init__(self, Material): # initiatlization
         
-       if  Material=='Grey Cast Iron':
+        if  Material=='Grey Cast Iron':
            self.CastIron()
-       elif Material=='Nitrided Stainless Steel':
+        elif Material=='Nitrided Stainless Steel':
            self.Steel()
-       else:
+        elif Material == 'Coating':
+            self.Coating()
+        else:
            print("Undefined Material")
            self.Undefined()
  
@@ -37,5 +39,11 @@ class Solids:
         self.YoungsModulus=210.0e9  # Pa
         self.PoissonModulus=0.28 
         self.Hardness=1200.0e6   # Pa
+    
+    def Coating(self):
+        self.Name = 'Coating'
+        self.YoungsModulus = 350e9 # Pa
+        self.PoissonModulus = .25
+        self.Hardness = 29e9 # Pa
         
 
