@@ -104,7 +104,7 @@ Reynolds=ReynoldsSolver(Grid,Time,Ops,Mixture,Discretization)
 Reynolds.SetSolver(MaxIterReynolds,TolP,UnderRelaxP,TolT,UnderRelaxT,VisualFeedbackLevel)
 
 """ Set Load Balance loop"""
-MaxIterLoad= 40 #originally 40
+MaxIterLoad= 41 #originally 40
 Tolh0=1e-3 
 UnderRelaxh0=0.25
 Delta_Load = 0.0
