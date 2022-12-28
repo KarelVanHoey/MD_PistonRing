@@ -45,7 +45,7 @@ VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, pe
 SaveFig2File=True # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
-SaveStates=False # Save States to File? True/False
+SaveStates=True # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -213,7 +213,7 @@ while time<Time.nt:
         if VisualFeedbackLevel>1:
            fig=vis.Report_PT(Grid,StateVector[time])                       
            if SaveFig2File:
-               figname="Test_fig/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
+               figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms_LoadIteration_"+str(k_load)+".png" 
                fig.savefig(figname, dpi=300)  
            plt.close(fig)
 
