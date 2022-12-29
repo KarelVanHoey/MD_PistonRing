@@ -125,17 +125,30 @@ for time in range(1,Time.nt): # [100]:#
 # for i in StateVector:
 #     print(i)
 """Post-Processing"""
-# ## Hydrodynamic load and asperity load
-# P_hydro = np.zeros(Time.nt - 1)
-# P_asp = np.zeros(Time.nt - 1)
-# for time in range(Time.nt - 1):
-#     P_hydro[time] = StateVector[time].HydrodynamicLoad
-#     P_asp[time] = StateVector[time].AsperityLoad
-# plt.plot(P_hydro)
-# plt.plot(P_asp)
-# plt.plot(P_hydro+P_asp)
-# # plt.show()
-# plt.close()
+P_hydro = np.zeros(Time.nt - 1)
+P_asp = np.zeros(Time.nt - 1)
+P_hydro_c = np.zeros(Time.nt - 1)
+P_asp_c = np.zeros(Time.nt - 1)
+for time in range(Time.nt - 1):
+    P_hydro[time] = StateVector[time].HydrodynamicLoad
+    P_asp[time] = StateVector[time].AsperityLoad
+    # P_hydro_c[time] = StateVector_c[time].HydrodynamicLoad
+    # P_asp_c[time] = StateVector_c[time].AsperityLoad
+# plt.plot(P_hydro,linestyle='dashdot')
+# plt.plot(P_asp,linestyle='dashdot')
+plt.plot(Ops.CranckAngle[1:],P_hydro+P_asp,label='Hydrodynamic load + Asperity load')
+plt.plot(Ops.CranckAngle[1:],P_hydro,label='Hydrodynamic load')
+plt.plot(Ops.CranckAngle[1:],P_asp,label='Asperity load')
+plt.plot(Ops.CranckAngle[1:], Ops.CompressionRingLoad[1:],label='Compression ring load')
+# plt.plot(Ops.CranckAngle[1:],P_hydro_c+P_asp_c,label='Hydrodynamic load + Asperity load')
+pi = np.pi
+psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
+plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
+plt.legend()
+plt.savefig('PostProcessing_worn/WORN_hydrodynamic_and_asp_load.png',dpi=300)
+plt.show()
+plt.close()
+
 
 interesting_timestamps = np.array([1, 94, 500, 563, 999]) #250, 
 
@@ -382,12 +395,12 @@ plt.close()
 
 # for time in interesting_timestamps:
 time = 999 # We are only interested in wear after a full combustion cycle
-# plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'o',markersize=3)
-# plt.xlabel('Location on cylinder liner [mm]')
-# plt.ylabel('Wear depth [m]')
-# plt.savefig('PostProcessing_worn/WORN_Wear_cylinder.png',dpi=300)    
-# plt.show()
-# plt.close()
+plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'o',markersize=3)
+plt.xlabel('Location on cylinder liner [mm]')
+plt.ylabel('Wear depth [m]')
+plt.savefig('PostProcessing_worn/WORN_Wear_cylinder.png',dpi=300)    
+plt.show()
+plt.close()
 
 # print('Maximim wear depth on cylinder sleeve = ' + str(max(StateVector[time].WearDepthCylinder)))
 
