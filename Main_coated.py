@@ -157,7 +157,7 @@ else:
     StateVector[time].WearDepthCylinder=0.0*StateVector[time].WearLocationsCylinder
     
     if SaveStates:
-        FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_coated/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         #Data2File={'Grid': Grid,'Time': Time,'State': StateVector[time]}
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
