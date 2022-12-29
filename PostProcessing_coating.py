@@ -223,7 +223,7 @@ plt.close()
 ## Multicolor filmthickness
 gradient = np.linspace(0,1,len(Ops.CranckAngle[1:]))
 for i in range(len(Lambda_values)):
-    plt.plot(Ops.CranckAngle[i+1],Lambda_values[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
+    plt.plot(Ops.CranckAngle[i+1],Lambda_c[i],'o',color=(.47,gradient[i],gradient[i]),markersize=3)
 plt.xlabel('Crank angle $\psi$ [rad]')
 plt.ylabel('$\Lambda$ [-]')
 plt.hlines([ 2.5],-2,15,'k',['dashdot'], linewidth=.8,label='Λ = 2.5')
@@ -275,7 +275,7 @@ plt.close()
 i=0
 for time in interesting_timestamps:
     i+=1
-    vis.Report_PT(Grid, StateVector[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
+    vis.Report_PT(Grid, StateVector_c[time], time=time) # plt.show() has to be uncommented in VisualLib --> kan ook gwn hier
     figname="PostProcessing_coating/COATING_PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.title('Point ' +str(i))
     plt.tight_layout()
