@@ -121,7 +121,7 @@ for time in range(1,Time.nt): # [100]:#
 
 time=0
 for time in range(1,Time.nt): # [100]:# 
-    FileName = 'Data_coating/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName = 'Data_coated/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     
@@ -161,24 +161,24 @@ for time in range(1,Time.nt): # [100]:#
 """Post-Processing"""
 
 ## Hydrodynamic load and asperity load
-P_hydro = np.zeros(Time.nt - 1)
-P_asp = np.zeros(Time.nt - 1)
-P_hydro_c = np.zeros(Time.nt - 1)
-P_asp_c = np.zeros(Time.nt - 1)
-for time in range(Time.nt - 1):
-    P_hydro[time] = StateVector[time].HydrodynamicLoad
-    P_asp[time] = StateVector[time].AsperityLoad
-    P_hydro_c[time] = StateVector_c[time].HydrodynamicLoad
-    P_asp_c[time] = StateVector_c[time].AsperityLoad
-plt.plot(P_hydro,'dashdot')
-plt.plot(P_asp,'dashdot')
-plt.plot(P_hydro+P_asp,'dashdot')
-plt.plot(P_hydro_c)
-plt.plot(P_asp_c)
-plt.plot(P_hydro_c+P_asp_c)
-plt.savefig('PostProcessing_coating/COATING_hydrodynamic_and_asp_load.png',dpi=300)
-plt.show()
-plt.close()
+# P_hydro = np.zeros(Time.nt - 1)
+# P_asp = np.zeros(Time.nt - 1)
+# P_hydro_c = np.zeros(Time.nt - 1)
+# P_asp_c = np.zeros(Time.nt - 1)
+# for time in range(Time.nt - 1):
+#     P_hydro[time] = StateVector[time].HydrodynamicLoad
+#     P_asp[time] = StateVector[time].AsperityLoad
+#     P_hydro_c[time] = StateVector_c[time].HydrodynamicLoad
+#     P_asp_c[time] = StateVector_c[time].AsperityLoad
+# plt.plot(P_hydro,'dashdot')
+# plt.plot(P_asp,'dashdot')
+# plt.plot(P_hydro+P_asp,'dashdot')
+# plt.plot(P_hydro_c)
+# plt.plot(P_asp_c)
+# plt.plot(P_hydro_c+P_asp_c)
+# plt.savefig('PostProcessing_coating/COATING_hydrodynamic_and_asp_load.png',dpi=300)
+# plt.show()
+# plt.close()
 
 interesting_timestamps = np.array([1, 94, 500, 563, 999]) #250, 
 
@@ -349,8 +349,8 @@ v = np.zeros(Time.nt - 1)
 for time in range(Time.nt - 1):
     v[time] = Ops.SlidingVelocity[time]
 
-W_dot_shear = F_tan * abs(v)
-W_dot_shear_c = F_tan_c * abs(v)
+W_dot_shear = abs(F_tan * v)
+W_dot_shear_c = abs(F_tan_c * v)
 
 ### Plotting of shear power
 
@@ -365,8 +365,8 @@ plt.close()
 
 
 ### Calculation of total shear
-W_shear = np.trapz(W_dot_shear,Time.t)
-W_shear_c = np.trapz(W_dot_shear_c,Time.t)
+W_shear = np.trapz(W_dot_shear,Time.t[1:])
+W_shear_c = np.trapz(W_dot_shear_c,Time.t[1:])
 
 print('Total shear work for normal ring and cylinder = ' + str(W_shear) + 'Nm')
 print('Total shear work for coated ring and cylinder = ' + str(W_shear_c) + 'Nm')

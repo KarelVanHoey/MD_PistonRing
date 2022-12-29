@@ -173,7 +173,7 @@ class ReynoldsSolver:
             # delta_T = T_star - StateVector[time].Temperature
             delta_T = np.maximum(T_star,self.Ops.OilTemperature) - StateVector[time].Temperature
             StateVector[time].Temperature += delta_T * self.UnderRelaxT
-            # StateVector[time].Temperature = np.minimum(StateVector[time].Temperature, 260+273.15)
+            StateVector[time].Temperature = np.minimum(StateVector[time].Temperature, 260+273.15)
             # if np.max(StateVector[time].Temperature) > 1e10:
             #     StateVector[time].Temperature = np.ones(len(StateVector[time].Temperature)) * self.Ops.OilTemperature
             
