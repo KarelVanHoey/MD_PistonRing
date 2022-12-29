@@ -53,5 +53,5 @@ class Ops:
         self.IsochoricExpCoeff=np.log(self.CylinderPressure[self.AdiabaticExpansion[-1]]/self.AtmosphericPressure)/np.log(Engine.MaximumVolume/self.ChamberVolume[self.AdiabaticExpansion[-1]])
         self.CylinderPressure[self.IsochoricExpansion]=self.AtmosphericPressure*(Engine.MaximumVolume/self.ChamberVolume[self.IsochoricExpansion])**self.IsochoricExpCoeff
         self.CylinderPressure[self.BlowOut]=self.AtmosphericPressure
-        self.CompressionRingLoad=((self.CylinderPressure-self.AtmosphericPressure))*Engine.CompressionRing.Thickness + (Engine.CompressionRing.FreeGapSize*Engine.CompressionRing.Material.YoungsModulus*Engine.CompressionRing.Thickness*Engine.CompressionRing.Width**3.0)/(36.0*np.pi*Engine.CompressionRing.Thickness*Engine.Cylinder.Radius**4.0)*Engine.CompressionRing.Thickness #%[N/m]
+        self.CompressionRingLoad=((self.CylinderPressure))*Engine.CompressionRing.Thickness + (Engine.CompressionRing.FreeGapSize*Engine.CompressionRing.Material.YoungsModulus*Engine.CompressionRing.Thickness*Engine.CompressionRing.Width**3.0)/(36.0*np.pi*Engine.CompressionRing.Thickness*Engine.Cylinder.Radius**4.0)*Engine.CompressionRing.Thickness #%[N/m]
         
