@@ -42,10 +42,10 @@ class Cylinder:
     def __init__(self, EngineType): # initiatlization
             if EngineType=='VW 2.0 R4 16v TDI CR 103kW':
                 self.Radius=(81.0/2.0)/1000.0  # m
-                # self.Roughness=0.2e-6
-                self.Roughness= 1.25 * 20e-9 #m COATING
-                # self.Material=Solids("Grey Cast Iron")
-                self.Material=Solids("Coating")
+                self.Roughness=0.2e-6
+                # self.Roughness= 1.25 * 20e-9 #m COATING
+                self.Material=Solids("Grey Cast Iron")
+                # self.Material=Solids("Coating")
             else:
                 self.Radius= []
                 self.Roughness= []
@@ -85,11 +85,11 @@ class CompressionRing:
                 self.GapSize=0.0005 #m
                 self.FreeGapSize=0.012 #m
                 self.CrownHeight=10e-6  #Defines barrel shape
-                # self.Roughness=0.1e-6 #m 
-                self.Roughness = 1.25 * 20e-9 #m   COATING
+                self.Roughness=0.1e-6 #m 
+                # self.Roughness = 1.25 * 20e-9 #m   COATING
                 self.Curvature=((self.Thickness/2.0)**2.0)/(2*self.CrownHeight)
-                # self.Material=Solids("Nitrided Stainless Steel")
-                self.Material=Solids("Coating") # COATING
+                self.Material=Solids("Nitrided Stainless Steel")
+                # self.Material=Solids("Coating") # COATING
             else:
                 self.Thickness=[]
                 self.Width=[]

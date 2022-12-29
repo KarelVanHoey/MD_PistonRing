@@ -81,8 +81,8 @@ Discretization=FiniteDifferences(Grid)
 
 """Read Data"""
 time=0
-for time in range(1,Time.nt): # [100]:# 
-    FileName='Data_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+for time in range(1,16):#range(1,Time.nt): # [100]:# 
+    FileName='Test_data/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     StateVector[time].h0=float(Data['State']['h0']) # ok

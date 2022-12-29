@@ -41,8 +41,8 @@ import VisualLib as vis
 
 
 """General Settings for Input and Output """
-VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=True # Save figures to file? True/False
+VisualFeedbackLevel=0 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
+SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
 SaveStates=True # Save States to File? True/False
@@ -228,7 +228,7 @@ while time<Time.nt:
         # fig = vis.Report_Ops_PT(Time,Ops,time, Grid,StateVector[time])
         if SaveFig2File:# and round(Time.t[time]*1000,5)*100 % 10 == 0:
             # figname="Figures/PT@Time_"+str(round(Time.t[time]*1000,5))+"ms.png" 
-            figname="Figures/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+            figname="Test_fig/PT@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
             fig.savefig(figname, dpi=300)
         plt.close(fig)
     
@@ -245,7 +245,7 @@ while time<Time.nt:
     
     """Save Output""" 
     if SaveStates:
-        FileName='Data/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_new/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 
