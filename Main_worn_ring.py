@@ -41,11 +41,11 @@ import VisualLib as vis
 
 
 """General Settings for Input and Output """
-VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
+VisualFeedbackLevel=0 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
 SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
-SaveStates=False # Save States to File? True/False
+SaveStates=True # Save States to File? True/False
 
 """I/O Operator"""
 IO=IOHDF5()
@@ -236,8 +236,8 @@ while time<Time.nt:
         StateVector[time].h0 = h0_k[k_load]
         # StateVector[time].h = StateVector[time].h0 + 4 * Engine.CompressionRing.CrownHeight * (Grid.x**2) / (Engine.CompressionRing.Thickness**2)    
     
-    plt.plot(StateVector[time].h)
-    plt.show()
+    # plt.plot(StateVector[time].h)
+    # plt.show()
     # plt.plot(Delta_Load)
     # plt.show()
     

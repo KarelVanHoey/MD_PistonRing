@@ -41,8 +41,8 @@ import VisualLib as vis
 
 
 """General Settings for Input and Output """
-VisualFeedbackLevel=1 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
-SaveFig2File=True # Save figures to file? True/False
+VisualFeedbackLevel=0 # [0,1,2,3] = [none, per time step, per load iteration, per # reynolds iterations]
+SaveFig2File=False # Save figures to file? True/False
 LoadInitialState=False # Load The InitialState? True/False
 InitTime=0.0 #Initial Time to Load?
 SaveStates=True # Save States to File? True/False
@@ -245,7 +245,7 @@ while time<Time.nt:
     
     """Save Output""" 
     if SaveStates:
-        FileName='Data_c/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
+        FileName='Data_coated/Time_'+str(round(Time.t[time]*1000,5))+'ms.h5'
         Data2File={'State': StateVector[time]}
         IO.SaveData(FileName,Data2File)
 
