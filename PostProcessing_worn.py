@@ -82,8 +82,8 @@ Discretization=FiniteDifferences(Grid)
 """Read Data"""
 time=0
 Lambda_new = []
-for time in range(1,Time.nt): # [100]:# 
-    FileName='Data_worn_v4/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+for time in range(1,603):#range(1,Time.nt): # [100]:# 
+    FileName='Data_worn_temp/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
     FileName2 = 'Data_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
@@ -167,28 +167,28 @@ for time in range(Time.nt - 1):
     COF_values[time] = abs(StateVector[time].COF)
 
 ## Single color film thickness
-# plt.plot(Ops.CranckAngle[1:], Lambda_values, 'o',label='worn ring',markersize=3)
-# plt.plot(Ops.CranckAngle[1:], Lambda_new, 'o',label='new ring',markersize=3)
-# plt.xlabel('Crank angle $\psi$ [rad]')
-# plt.ylabel('$\Lambda$ [-]')
-# plt.hlines([ 2.5],-2,15,'k',['dashdot'], linewidth=.8,label='Λ = 2.5')
-# plt.hlines([1],-2,15,'k',['dotted'], linewidth=.8,label='Λ = 1')
-# plt.xlim([-.5, 13])
-# # plt.vlines(Ops.CranckAngle[time],-1,60,'k','--', linewidth=.6)
-# plt.ylim([-1,60])
-# plt.legend(loc= (.58,.75))
-# pi = np.pi
-# psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
-# plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
+plt.plot(Ops.CranckAngle[1:], Lambda_values, 'o',label='worn ring',markersize=3)
+plt.plot(Ops.CranckAngle[1:603], Lambda_new, 'o',label='new ring',markersize=3)
+plt.xlabel('Crank angle $\psi$ [rad]')
+plt.ylabel('$\Lambda$ [-]')
+plt.hlines([ 2.5],-2,15,'k',['dashdot'], linewidth=.8,label='Λ = 2.5')
+plt.hlines([1],-2,15,'k',['dotted'], linewidth=.8,label='Λ = 1')
+plt.xlim([-.5, 13])
+# plt.vlines(Ops.CranckAngle[time],-1,60,'k','--', linewidth=.6)
+plt.ylim([-1,60])
+plt.legend(loc= (.58,.75))
+pi = np.pi
+psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
+plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
 
-# plt.vlines(Ops.CranckAngle[interesting_timestamps],-3,60,'k','--', linewidth=.6)
+plt.vlines(Ops.CranckAngle[interesting_timestamps],-3,60,'k','--', linewidth=.6)
 
-# p = Rectangle((2.156*pi,-3),1.364*pi,70,ec='red',fc='white',zorder=.1,hatch='/') #,fc='red'
-# plt.gca().add_patch(p)
+p = Rectangle((2.156*pi,-3),1.364*pi,70,ec='red',fc='white',zorder=.1,hatch='/') #,fc='red'
+plt.gca().add_patch(p)
 
-# plt.savefig('PostProcessing_worn/WORN_Film_thickness_comparison.png',dpi=300)
-# plt.show()
-# plt.close()
+plt.savefig('PostProcessing_worn/WORN_Film_thickness_comparison.png',dpi=300)
+plt.show()
+plt.close()
 
 ## Multicolor filmthickness
 # gradient = np.linspace(0,1,len(Ops.CranckAngle[1:]))

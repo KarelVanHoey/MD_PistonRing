@@ -332,7 +332,7 @@ for time in range(Time.nt - 1):
     WearDepthRing_c[time] = StateVector_c[time].WearDepthRing
 
 plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'o',label='Normal ring and piston',markersize=3)
-plt.plot(Ops.CranckAngle[1:], WearDepthRing_c - WearDepthRing_c[1], 'o',label='Coated ring and piston',markersize=3)
+plt.plot(Ops.CranckAngle[1:], WearDepthRing_c , 'o',label='Coated ring and piston',markersize=3)
 plt.xlabel('Crank angle [rad]')
 # plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
 # plt.xlabel('time [s]')
@@ -340,7 +340,7 @@ pi = np.pi
 psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
 plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
 plt.ylabel('Weardepth ring [mm]')
-plt.ylim([-.1e-13, 2.5e-13])
+# plt.ylim([-.1e-13, 2.5e-13])
 plt.legend()
 plt.savefig('PostProcessing_coating/COATING_WearDepth_ring_comparison.png',dpi=300)
 # plt.show()
@@ -363,7 +363,7 @@ print('Maximum wear depth on cylinder sleeve = ' + str(max(StateVector[time].Wea
 
 ## lifetime compression ring
 
-WearDepth_one_comb_cycle = StateVector_c[999].WearDepthRing - StateVector_c[1].WearDepthRing # constant wear rate assumed
+WearDepth_one_comb_cycle = StateVector_c[999].WearDepthRing #- StateVector_c[1].WearDepthRing # constant wear rate assumed
 reduction = 0.2 * Engine.CompressionRing.CrownHeight
 # reduction = 20e-6 # coating is 20µm thick --> other level is smaller!! 0.2*10µm
 nr_comb_cycles = reduction / WearDepth_one_comb_cycle
@@ -397,7 +397,7 @@ W_dot_shear_c = abs(F_tan_c * v)
 
 plt.plot(Ops.CranckAngle[1:], W_dot_shear, label='Normal ring and cylinder')
 plt.plot(Ops.CranckAngle[1:], W_dot_shear_c, label='Coated ring and cylinder')
-plt.ylabel('Shear power [W]')
+plt.ylabel('Shear power [W/m]')
 plt.xlabel('Crank angle $\psi$ [rad]')
 pi = np.pi
 psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
@@ -412,7 +412,7 @@ plt.close()
 W_shear = np.trapz(W_dot_shear,Time.t[1:])
 W_shear_c = np.trapz(W_dot_shear_c,Time.t[1:])
 
-print('Total shear work for normal ring and cylinder = ' + str(W_shear) + 'Nm')
-print('Total shear work for coated ring and cylinder = ' + str(W_shear_c) + 'Nm')
+print('Total shear work for normal ring and cylinder = ' + str(W_shear) + 'Nm/m')
+print('Total shear work for coated ring and cylinder = ' + str(W_shear_c) + 'Nm/m')
 
 
