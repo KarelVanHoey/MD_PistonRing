@@ -121,7 +121,7 @@ for time in range(1,Time.nt): # [100]:#
 
 time=0
 for time in range(1,Time.nt): # [100]:# 
-    FileName = 'Data_coated/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName = 'Data_coated_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     
@@ -172,7 +172,7 @@ for time in range(Time.nt - 1):
     P_asp_c[time] = StateVector_c[time].AsperityLoad
 # plt.plot(P_hydro,linestyle='dashdot')
 # plt.plot(P_asp,linestyle='dashdot')
-plt.plot(Ops.CranckAngle[1:],P_hydro+P_asp,linestyle='dashdot',label='F')
+plt.plot(Ops.CranckAngle[1:],Ops.CompressionRingLoad[1:],linestyle='dashdot',label='Compression ring load')
 plt.plot(Ops.CranckAngle[1:],P_hydro_c,label='Hydrodynamic load')
 plt.plot(Ops.CranckAngle[1:],P_asp_c,label='Asperity load')
 plt.plot(Ops.CranckAngle[1:],P_hydro_c+P_asp_c,label='Hydrodynamic load + Asperity load')
@@ -181,7 +181,7 @@ psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
 plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
 plt.legend()
 plt.savefig('PostProcessing_coating/COATING_hydrodynamic_and_asp_load.png',dpi=300)
-plt.show()
+# plt.show()
 plt.close()
 
 interesting_timestamps = np.array([1, 94, 500, 563, 999]) #250, 
@@ -381,12 +381,14 @@ print('aantal km cylinder liner = ', km2)
 
 
 ## Quantification of efficiency
-F_tan = StateVector[time].ViscousFriction + StateVector[time].AsperityFriction
-F_tan_c = StateVector_c[time].ViscousFriction + StateVector_c[time].AsperityFriction
 
+F_tan = np.zeros(Time.nt - 1)
+F_tan_c = np.zeros(Time.nt - 1)
 v = np.zeros(Time.nt - 1)
 for time in range(Time.nt - 1):
     v[time] = Ops.SlidingVelocity[time]
+    F_tan[time] = StateVector[time].ViscousFriction + StateVector[time].AsperityFriction
+    F_tan_c[time] = StateVector_c[time].ViscousFriction + StateVector_c[time].AsperityFriction
 
 W_dot_shear = abs(F_tan * v)
 W_dot_shear_c = abs(F_tan_c * v)
@@ -396,9 +398,12 @@ W_dot_shear_c = abs(F_tan_c * v)
 plt.plot(Ops.CranckAngle[1:], W_dot_shear, label='Normal ring and cylinder')
 plt.plot(Ops.CranckAngle[1:], W_dot_shear_c, label='Coated ring and cylinder')
 plt.ylabel('Shear power [W]')
-plt.xlabel('time [s]')
+plt.xlabel('Crank angle $\psi$ [rad]')
+pi = np.pi
+psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
+plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
 plt.legend()
-plt.savefig('PostProcessing_worn/WORN_shear_power.png',dpi=300)    
+plt.savefig('PostProcessing_coating/COATING_shear_power.png',dpi=300)    
 # plt.show()
 plt.close()
 
