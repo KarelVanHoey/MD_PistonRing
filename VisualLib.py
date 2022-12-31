@@ -16,17 +16,17 @@ def Report_PT(Grid,State,time=None): # initiatlization
 
     f1, ax1 = plt.subplots()
     color = 'tab:blue'
-    ax1.set_xlabel('$x [m]$')
+    ax1.set_xlabel('$x [mm]$')
     if time is not None:
         ax1.set_ylabel('$P [MPa]$ at time =' + str(time*5/100) + 'ms',color=color)
     else:
         ax1.set_ylabel('$P [MPa]$',color=color)
-    ax1.plot(Grid.x,State.Pressure/1e6,'x-', linewidth=1,color=color)
+    ax1.plot(Grid.x*1000,State.Pressure/1e6,'x-', linewidth=1,color=color)
     ax1.tick_params(axis='y')
     ax2 = ax1.twinx()  # instantiate a second axes that shares the same x-axis
     color = 'tab:red'
     ax2.set_ylabel('$T [^\circ C]$',color=color)  # we already handled the x-label with ax1
-    ax2.plot(Grid.x,State.Temperature-273.15,'x-', linewidth=1,color=color)
+    ax2.plot(Grid.x*1000,State.Temperature-273.15,'x-', linewidth=1,color=color)
     ax2.tick_params(axis='y')
     # f1.tight_layout()  # otherwise the right y-label is slightly clipped
     # plt.show()
