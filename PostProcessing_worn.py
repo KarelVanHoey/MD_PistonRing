@@ -84,7 +84,7 @@ time=0
 Lambda_new = []
 for time in range(1,Time.nt): # [100]:# 
     FileName='Data_worn_v5/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
-    FileName2 = 'Data_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName2 = 'Data_v3/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     
