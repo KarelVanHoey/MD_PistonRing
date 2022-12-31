@@ -183,8 +183,8 @@ plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π']
 
 plt.vlines(Ops.CranckAngle[interesting_timestamps],-3,60,'k','--', linewidth=.6)
 
-p = Rectangle((2.156*pi,-3),1.364*pi,70,ec='red',fc='white',zorder=.1,hatch='/') #,fc='red'
-plt.gca().add_patch(p)
+# p = Rectangle((2.156*pi,-3),1.364*pi,70,ec='red',fc='white',zorder=.1,hatch='/') #,fc='red'
+# plt.gca().add_patch(p)
 
 plt.savefig('PostProcessing_worn/WORN_Film_thickness_comparison.png',dpi=300)
 plt.show()
@@ -201,8 +201,8 @@ plt.hlines([1],-2,15,'k',['dotted'], linewidth=.8,label='Λ = 1')
 plt.xlim([-.5, 13])
 plt.vlines(Ops.CranckAngle[interesting_timestamps],-3,60,'k','--', linewidth=.6)
 plt.ylim([-1,60])
-p = Rectangle((2.156*pi,-3),1.364*pi,70,ec='red',fc='white',zorder=.1,hatch='/') #,fc='red'
-plt.gca().add_patch(p)
+# p = Rectangle((2.156*pi,-3),1.364*pi,70,ec='red',fc='white',zorder=.1,hatch='/') #,fc='red'
+# plt.gca().add_patch(p)
 pi = np.pi
 psi = np.arange(0, 4 * pi + pi/2, step=(pi/2))
 plt.xticks(psi,['0','π/2', 'π', '3π/2', '2π','5π/2', '3π', '7π/2', '4π'])
@@ -260,7 +260,7 @@ for time in interesting_timestamps:
     plt.plot(Grid.x*1000,StateVector[time].VapourVolumeFraction)
     plt.ylabel(chr(945) + ' [-]'+' at time =' + str(time*5/100) + 'ms')
     plt.xlabel('x [mm]')
-    figname="PostProcessing_worn/alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    figname="PostProcessing_worn/WORN_alpha@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
     # plt.show()
     plt.close()
@@ -269,7 +269,7 @@ for time in interesting_timestamps:
     plt.plot(Grid.x*1000,StateVector[time].Density)
     plt.ylabel('Density [kg/m³]'+' at time =' + str(time*5/100) + 'ms')
     plt.xlabel('x [mm]')
-    figname="PostProcessing_worn/rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    figname="PostProcessing_worn/WORN_rho@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
     # plt.show()
     plt.close()
@@ -278,7 +278,7 @@ for time in interesting_timestamps:
     plt.plot(Grid.x*1000,StateVector[time].Viscosity)
     plt.ylabel('Viscosity [Pa s]'+' at time =' + str(time*5/100) + 'ms')
     plt.xlabel('x [mm]')
-    figname="PostProcessing_worn/µ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
+    figname="PostProcessing_worn/WORNµ@Time_"+"{0:.2f}".format(round(Time.t[time]*1000,5))+"ms.png" 
     plt.savefig(figname,dpi=300)
     # plt.show()
     plt.close()
