@@ -86,7 +86,7 @@ Discretization=FiniteDifferences(Grid)
 """Read Data"""
 time=0
 for time in range(1,Time.nt): # [100]:# 
-    FileName = 'Data_v2/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
+    FileName = 'Data_v3/Time_'+str(round(Time.t[time]*1000,4))+'ms.h5' 
 
     Data=IO.ReadData(FileName)
     
@@ -210,8 +210,8 @@ for time in range(Time.nt - 1):
 
 
 ## Single color film thickness
-plt.plot(Ops.CranckAngle[1:], Lambda_values, 'o',label='Normal ring and cylinder',markersize=3)
-plt.plot(Ops.CranckAngle[1:], Lambda_c, 'o',label='Coated ring and cylinder',markersize=3)
+plt.plot(Ops.CranckAngle[1:], Lambda_values, 'o',label='Normal roughness',markersize=3)
+plt.plot(Ops.CranckAngle[1:], Lambda_c, 'o',label='Halved roughness',markersize=3)
 plt.xlabel('Crank angle $\psi$ [rad]')
 plt.ylabel('$\Lambda$ [-]')
 plt.hlines([ 2.5],-2,15,'k',['dashdot'], linewidth=.8,label='Λ = 2.5')
@@ -254,8 +254,8 @@ plt.savefig('PostProcessing_coating/COATING_Film_thickness.png',dpi=300)
 plt.close()
 
 ## Dimensionfull film thickness!
-plt.plot(Ops.CranckAngle[1:], h0, 'o',label='Normal ring and cylinder',markersize=3)
-plt.plot(Ops.CranckAngle[1:], h0_c, 'o',label='Coated ring and cylinder',markersize=3)
+plt.plot(Ops.CranckAngle[1:], h0, 'o',label='Normal roughness',markersize=3)
+plt.plot(Ops.CranckAngle[1:], h0_c, 'o',label='Halved roughness',markersize=3)
 plt.xlabel('Crank angle $\psi$ [rad]')
 plt.ylabel('h0 [m]')
 # plt.hlines([ 2.5],-2,15,'k',['dashdot'], linewidth=.8,label='Λ = 2.5')
@@ -279,8 +279,8 @@ plt.close()
 
 ## Stribeck curve
 
-plt.plot(Hersey_values*10**4, COF_values, 'o',markersize=3,label='Original ring and cylinder')
-plt.plot(Hersey_c*10**4, COF_c, 'o',markersize=3,label='Coated ring and cylinder')
+plt.plot(Hersey_values*10**4, COF_values, 'o',markersize=3,label='Original roughness')
+plt.plot(Hersey_c*10**4, COF_c, 'o',markersize=3,label='Halved roughness')
 plt.xlabel('Hersey number x$ 10^4$ [-]')
 plt.ylabel('Coefficient of Friction [-]')
 plt.legend()
@@ -331,8 +331,8 @@ for time in range(Time.nt - 1):
     WearDepthRing_values[time] = StateVector[time].WearDepthRing
     WearDepthRing_c[time] = StateVector_c[time].WearDepthRing
 
-plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'o',label='Normal ring and piston',markersize=3)
-plt.plot(Ops.CranckAngle[1:], WearDepthRing_c , 'o',label='Coated ring and piston',markersize=3)
+plt.plot(Ops.CranckAngle[1:], WearDepthRing_values, 'o',label='Normal roughness',markersize=3)
+plt.plot(Ops.CranckAngle[1:], WearDepthRing_c , 'o',label='Halved roughness',markersize=3)
 plt.xlabel('Crank angle [rad]')
 # plt.plot(Time.t[1:], WearDepthRing_values, 'bo')
 # plt.xlabel('time [s]')
@@ -349,8 +349,8 @@ plt.close()
 
 # for time in interesting_timestamps:
 time = 999 # We are only interested in wear after a full combustion cycle
-plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'o',label='Normal ring and piston',markersize=3)
-plt.plot(StateVector_c[time].WearLocationsCylinder*1000 - 95.5, StateVector_c[time].WearDepthCylinder, 'o',label='Coated ring and piston',markersize=3)
+plt.plot(StateVector[time].WearLocationsCylinder*1000 - 95.5, StateVector[time].WearDepthCylinder, 'o',label='Normal roughness',markersize=3)
+plt.plot(StateVector_c[time].WearLocationsCylinder*1000 - 95.5, StateVector_c[time].WearDepthCylinder, 'o',label='Halved roughness',markersize=3)
 plt.xlabel('Location on cylinder liner [mm]')
 plt.ylabel('Wear depth [m]')
 plt.legend()
@@ -395,8 +395,8 @@ W_dot_shear_c = abs(F_tan_c * v)
 
 ### Plotting of shear power
 
-plt.plot(Ops.CranckAngle[1:], W_dot_shear, label='Normal ring and cylinder')
-plt.plot(Ops.CranckAngle[1:], W_dot_shear_c, label='Coated ring and cylinder')
+plt.plot(Ops.CranckAngle[1:], W_dot_shear, label='Normal roughness')
+plt.plot(Ops.CranckAngle[1:], W_dot_shear_c, label='Halved roughness')
 plt.ylabel('Shear power [W/m]')
 plt.xlabel('Crank angle $\psi$ [rad]')
 pi = np.pi
@@ -412,7 +412,7 @@ plt.close()
 W_shear = np.trapz(W_dot_shear,Time.t[1:])
 W_shear_c = np.trapz(W_dot_shear_c,Time.t[1:])
 
-print('Total shear work for normal ring and cylinder = ' + str(W_shear) + 'Nm/m')
-print('Total shear work for coated ring and cylinder = ' + str(W_shear_c) + 'Nm/m')
+print('Total shear work for normal roughness = ' + str(W_shear) + 'Nm/m')
+print('Total shear work for Halved roughness = ' + str(W_shear_c) + 'Nm/m')
 
 
