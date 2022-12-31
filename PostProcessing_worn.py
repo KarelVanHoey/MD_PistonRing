@@ -168,7 +168,7 @@ for time in range(Time.nt - 1):
 
 ## Single color film thickness
 plt.plot(Ops.CranckAngle[1:], Lambda_values, 'o',label='worn ring',markersize=3)
-plt.plot(Ops.CranckAngle[1:603], Lambda_new, 'o',label='new ring',markersize=3)
+plt.plot(Ops.CranckAngle[1:], Lambda_new, 'o',label='new ring',markersize=3)
 plt.xlabel('Crank angle $\psi$ [rad]')
 plt.ylabel('$\Lambda$ [-]')
 plt.hlines([ 2.5],-2,15,'k',['dashdot'], linewidth=.8,label='Λ = 2.5')
